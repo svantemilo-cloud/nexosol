@@ -1,0 +1,98 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --forest: #065a45;
+  --neon-lime: #b8e986;
+  --surface: #f9fafb;
+  --font-sans: "Montserrat", system-ui, sans-serif;
+}
+
+html {
+  font-family: var(--font-sans);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--surface);
+}
+
+/* All text och formulär ska använda Montserrat */
+input,
+button,
+select,
+textarea,
+label {
+  font-family: inherit;
+}
+
+/* Slider thumb styling for calculator */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--forest);
+  cursor: pointer;
+  border: 3px solid var(--neon-lime);
+  box-shadow: 0 2px 8px rgba(6, 90, 69, 0.35);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--forest);
+  cursor: pointer;
+  border: 3px solid var(--neon-lime);
+  box-shadow: 0 2px 8px rgba(6, 90, 69, 0.35);
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+input[type="range"]::-moz-range-track {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+
+/* Touch-friendly sliders i kalkylatorn – större klick-/dragyta för mobil */
+.calculator-slider {
+  min-height: 44px;
+  touch-action: none;
+  padding: 12px 0;
+}
+.calculator-slider::-webkit-slider-thumb {
+  width: 24px;
+  height: 24px;
+}
+.calculator-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+}
+
+/* Installatörslogotyper – långsam oändlig scroll åt höger */
+@keyframes installer-marquee-scroll {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+.installer-marquee {
+  animation: installer-marquee-scroll 45s linear infinite;
+}
+.installer-marquee:hover {
+  animation-play-state: paused;
+}
