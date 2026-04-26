@@ -64,11 +64,12 @@ export function Calculator() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [emailError, setEmailError] = useState(false);
-  /** Honeypot — ska lämnas tom; fylls ofta av bots. */
-  const [fax, setFax] = useState("");
+  /** Honeypot — ska lämnas tom (undvik namn som "fax" pga webbläsarens autofill). */
+  const [nxHp, setNxHp] = useState("");
 
   const [showSuccess, setShowSuccess] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "sending" | "error">("idle");
+  const [submitErrorDetail, setSubmitErrorDetail] = useState<string | null>(null);
 
   const emailRef = useRef<HTMLInputElement>(null);
 
@@ -117,6 +118,7 @@ export function Calculator() {
     }
     setEmailError(false);
     setSubmitStatus("sending");
+    setSubmitErrorDetail(null);
 
     const payload = {
       firstName: firstName.trim() || undefined,
@@ -137,7 +139,7 @@ export function Calculator() {
       },
       estimatedProductionKwh: Math.round(calc.prod),
       estimatedRoiYears: Number(calc.payback.toFixed(1)),
-      fax,
+      _nx_hp: nxHp,
     };
 
     try {
@@ -146,7 +148,17 @@ export function Calculator() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("submit failed");
+      if (!res.ok) {
+        let detail = "";
+        try {
+          const errJson = (await res.json()) as { error?: string; detail?: string };
+          detail = [errJson.detail, errJson.error].filter(Boolean).join(" — ");
+        } catch {
+          detail = res.statusText || String(res.status);
+        }
+        setSubmitErrorDetail(detail || `HTTP ${res.status}`);
+        throw new Error("submit failed");
+      }
 
       const webhook = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
       if (webhook) {
@@ -162,7 +174,7 @@ export function Calculator() {
     } catch {
       setSubmitStatus("error");
     }
-  }, [calc, firstName, lastName, email, phone, address, roofType, region, fax]);
+  }, [calc, firstName, lastName, email, phone, address, roofType, region, nxHp]);
 
   const stepLabels = [
     "Steg 1 av 3 — Din förbrukning",
@@ -484,22 +496,25 @@ export function Calculator() {
                     />
                   </div>
 
-                  <div
-                    className="nx-honeypot"
-                    aria-hidden="true"
-                  >
-                    <label htmlFor="nx-fax">Fax</label>
+                  <div className="nx-honeypot" aria-hidden="true">
                     <input
-                      id="nx-fax"
+                      id="nx-hp"
                       tabIndex={-1}
-                      autoComplete="off"
-                      value={fax}
-                      onChange={(e) => setFax(e.target.value)}
+                      autoComplete="new-password"
+                      value={nxHp}
+                      onChange={(e) => setNxHp(e.target.value)}
                     />
                   </div>
 
                   {submitStatus === "error" && (
-                    <p className="text-sm text-red-600 mb-2">Något gick fel. Försök igen.</p>
+                    <p className="text-sm text-red-600 mb-2">
+                      Något gick fel. Försök igen.
+                      {submitErrorDetail ? (
+                        <span className="block mt-1 text-xs opacity-90 break-words">
+                          {submitErrorDetail}
+                        </span>
+                      ) : null}
+                    </p>
                   )}
                   <button
                     type="button"

@@ -34,9 +34,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as PublicLeadBody & { fax?: string };
+    const body = (await request.json()) as PublicLeadBody & {
+      fax?: string;
+      _nx_hp?: string;
+    };
 
-    if (typeof body.fax === "string" && body.fax.trim() !== "") {
+    const hp = typeof body._nx_hp === "string" ? body._nx_hp : body.fax;
+    if (typeof hp === "string" && hp.trim() !== "") {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 

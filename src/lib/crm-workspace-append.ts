@@ -91,41 +91,61 @@ export async function appendLeadToCrmWorkspace(
   leadId: string,
   createdAt: string
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  if (!isCrmWorkspaceSyncConfigured()) {
-    return { ok: false, message: "CRM workspace sync is not configured" };
+  try {
+    if (!isCrmWorkspaceSyncConfigured()) {
+      return { ok: false, message: "CRM workspace sync is not configured" };
+    }
+    const userId = targetUserId()!;
+    const supabase = serviceClient()!;
+    const newItem = buildCrmWorkspaceSubmission(body, leadId, createdAt);
+
+    const { data: row, error: readError } = await supabase
+      .from("crm_user_workspace")
+      .select("submissions")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (readError) {
+      return { ok: false, message: readError.message };
+    }
+
+    if (!row) {
+      const { error: insertError } = await supabase
+        .from("crm_user_workspace")
+        .insert({ user_id: userId, submissions: [newItem] });
+
+      if (insertError) {
+        return {
+          ok: false,
+          message: `Ingen workspace-rad fanns och insert misslyckades: ${insertError.message}. Logga in i Nexoadmin med det kontot en gång, eller lägg till saknade kolumner (NOT NULL) i tabellen.`,
+        };
+      }
+      return { ok: true };
+    }
+
+    const raw = row.submissions as unknown;
+    const submissions = Array.isArray(raw) ? [...raw] : [];
+    const next = [...submissions, newItem];
+
+    const { data: updatedRows, error: writeError } = await supabase
+      .from("crm_user_workspace")
+      .update({ submissions: next })
+      .eq("user_id", userId)
+      .select("user_id");
+
+    if (writeError) {
+      return { ok: false, message: writeError.message };
+    }
+    if (!updatedRows?.length) {
+      return {
+        ok: false,
+        message:
+          "Uppdateringen träffade ingen rad i crm_user_workspace (kolla att CRM_LEADS_TARGET_USER_ID stämmer med auth.users och att tabellen är public för service role).",
+      };
+    }
+    return { ok: true };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return { ok: false, message: `Nätverk eller oväntat fel mot Supabase: ${msg}` };
   }
-  const userId = targetUserId()!;
-  const supabase = serviceClient()!;
-  const newItem = buildCrmWorkspaceSubmission(body, leadId, createdAt);
-
-  const { data: row, error: readError } = await supabase
-    .from("crm_user_workspace")
-    .select("submissions")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  if (readError) {
-    return { ok: false, message: readError.message };
-  }
-  if (!row) {
-    return {
-      ok: false,
-      message:
-        "Ingen rad i crm_user_workspace för CRM_LEADS_TARGET_USER_ID. Öppna Nexoadmin en gång med den användaren så raden skapas.",
-    };
-  }
-
-  const raw = row.submissions as unknown;
-  const submissions = Array.isArray(raw) ? [...raw] : [];
-  const next = [...submissions, newItem];
-
-  const { error: writeError } = await supabase
-    .from("crm_user_workspace")
-    .update({ submissions: next })
-    .eq("user_id", userId);
-
-  if (writeError) {
-    return { ok: false, message: writeError.message };
-  }
-  return { ok: true };
 }
