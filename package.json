@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "preview": "next build && next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.104.1",
     "framer-motion": "^11.11.0",
     "lucide-react": "^0.460.0",
     "next": "^14.2.0",

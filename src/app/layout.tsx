@@ -1,7 +1,14 @@
 import type { Metadata, Viewport } from "next";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { ConditionalHeader } from "@/components/ConditionalHeader";
 import { articles } from "@/lib/articles";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-sans",
+});
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nexosol.se";
 const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
@@ -206,13 +213,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sv" className="scroll-smooth">
+    <html lang="sv" className={`scroll-smooth ${montserrat.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
+        {/* Om /_next/static/css inte laddas (blockering, nätverk) – undvik ren Times/UA-stil */}
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `:where(html){font-family:var(--font-sans),ui-sans-serif,system-ui,sans-serif}:where(body){margin:0;background:#f9fafb;color:#065a45}`,
+          }}
         />
         {gtmId && (
           <script

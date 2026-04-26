@@ -130,13 +130,21 @@ function getAdminUsersList(): AdminUserRecord[] {
 }
 
 export const store = {
-  addSubmission(s: Omit<Submission, "id" | "createdAt" | "stage" | "pod" | "customerType"> & { customerType?: CustomerType }): Submission {
+  addSubmission(
+    s: Omit<Submission, "id" | "createdAt" | "stage" | "pod" | "customerType"> & {
+      customerType?: CustomerType;
+      id?: string;
+      createdAt?: string;
+    }
+  ): Submission {
     const list = getSubmissions();
+    const createdAt = s.createdAt ?? new Date().toISOString();
+    const id = s.id ?? `sub_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
     const submission: Submission = {
       ...s,
       customerType: s.customerType ?? "privat",
-      id: `sub_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
-      createdAt: new Date().toISOString(),
+      id,
+      createdAt,
       stage: "leads",
       pod: "unassigned",
     };
