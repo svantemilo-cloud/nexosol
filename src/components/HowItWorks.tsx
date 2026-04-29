@@ -29,7 +29,10 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-16 px-4 sm:px-6 bg-forest/[0.04] scroll-mt-20">
+    <section
+      id="how-it-works"
+      className="py-12 sm:py-16 px-4 sm:px-6 bg-forest/[0.04] scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px))] md:scroll-mt-24"
+    >
       <div className="max-w-4xl mx-auto">
         <motion.h2
           initial={{ opacity: 0, y: 12 }}

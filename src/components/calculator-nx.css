@@ -702,6 +702,129 @@
   height: 1px;
 }
 
+/* Mobil & små skärmar — större touchytor, iOS (16px input mot zoom) */
+@media (max-width: 640px) {
+  .nx-calculator-root {
+    padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+  }
+
+  .nx-calculator-root .nx-wrap {
+    max-width: 100%;
+  }
+
+  .nx-calculator-root .nx-card {
+    border-radius: 20px;
+  }
+
+  .nx-calculator-root .nx-card-header {
+    padding: 1.25rem 1.1rem 0.9rem;
+  }
+
+  .nx-calculator-root .nx-body {
+    padding: 1.1rem 1.1rem 1.25rem;
+  }
+
+  .nx-calculator-root .nx-range {
+    --nx-range-thumb: 26px;
+    --nx-range-thumb-border: 3px;
+    min-height: 48px;
+  }
+
+  .nx-calculator-root .nx-range::-webkit-slider-thumb {
+    margin-top: -11px;
+  }
+
+  .nx-calculator-root .nx-option-row {
+    padding: 14px 16px;
+    min-height: 52px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+
+  .nx-calculator-root .nx-option-label {
+    font-size: 15px;
+  }
+
+  .nx-calculator-root .nx-option-sub {
+    font-size: 12px;
+  }
+
+  .nx-calculator-root .nx-stat {
+    padding: 12px 6px;
+  }
+
+  .nx-calculator-root .nx-stat-val {
+    font-size: 16px;
+  }
+
+  .nx-calculator-root .nx-stat-label {
+    font-size: 11px;
+  }
+
+  .nx-calculator-root .nx-input {
+    font-size: 16px;
+    padding: 12px 14px;
+    min-height: 48px;
+    border-radius: 10px;
+  }
+
+  .nx-calculator-root .nx-form-label {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .nx-calculator-root .nx-cta {
+    min-height: 52px;
+    font-size: 16px;
+    padding: 14px 16px;
+    border-radius: 12px;
+  }
+
+  .nx-calculator-root .nx-footer {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 1.1rem;
+    padding-bottom: max(14px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .nx-calculator-root .nx-nav-btn {
+    min-height: 44px;
+    padding: 10px 18px;
+    font-size: 14px;
+  }
+
+  .nx-calculator-root .nx-nav-btn.primary {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .nx-calculator-root .nx-footer-note {
+    width: 100%;
+    text-align: center;
+    order: -1;
+    font-size: 11px;
+  }
+
+  .nx-calculator-root .offert-hero-amount {
+    font-size: clamp(1.75rem, 9vw, 2.5rem);
+  }
+
+  .nx-calculator-root .urgency-strip {
+    font-size: 12px;
+    padding: 12px 14px;
+    line-height: 1.45;
+  }
+
+  .nx-calculator-root .success-title {
+    font-size: 20px;
+  }
+
+  .nx-calculator-root .success-sub {
+    font-size: 15px;
+  }
+}
+
 @media (max-width: 480px) {
   .nx-calculator-root .nx-form-row {
     grid-template-columns: 1fr;

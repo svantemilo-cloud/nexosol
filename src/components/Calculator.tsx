@@ -183,7 +183,10 @@ export function Calculator() {
   ];
 
   return (
-    <section id="calculator" className="nx-calculator-root py-10 px-4 sm:px-6 scroll-mt-20 bg-[#f4f6f4]">
+    <section
+      id="calculator"
+      className="nx-calculator-root py-8 sm:py-10 px-3 sm:px-6 scroll-mt-[calc(4rem+env(safe-area-inset-top,0px))] md:scroll-mt-24 bg-[#f4f6f4]"
+    >
       <div className="nx-wrap">
         <div className="nx-logo">
           <svg className="nx-logo-sun" viewBox="0 0 28 28" fill="none" aria-hidden>

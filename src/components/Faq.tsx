@@ -31,9 +31,12 @@ export function Faq() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="py-16 px-4 sm:px-6 scroll-mt-20">
+    <section
+      id="faq"
+      className="py-12 sm:py-16 px-4 sm:px-6 scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px))] md:scroll-mt-24"
+    >
       <div className="max-w-2xl mx-auto">
-        <h2 className="text-3xl font-bold text-forest mb-8 text-center">
+        <h2 className="text-2xl sm:text-3xl font-bold text-forest mb-6 sm:mb-8 text-center">
           Vanliga frågor
         </h2>
         <div className="space-y-3">
@@ -44,8 +47,9 @@ export function Faq() {
               className="rounded-2xl bg-white border border-forest/10 shadow-soft overflow-hidden"
             >
               <button
+                type="button"
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                className="w-full flex items-center justify-between p-5 text-left font-medium text-forest hover:bg-forest/5 transition-colors"
+                className="w-full flex items-center justify-between gap-3 min-h-[52px] p-4 sm:p-5 text-left text-[15px] sm:text-base font-medium text-forest hover:bg-forest/5 active:bg-forest/[0.07] transition-colors"
               >
                 {faq.question}
                 <motion.span

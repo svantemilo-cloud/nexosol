@@ -10,11 +10,26 @@
 
 html {
   font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(6, 90, 69, 0.12);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
   font-family: var(--font-sans), system-ui, sans-serif;
   background-color: var(--surface);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Header safe area (iPhone notch / Dynamic Island) */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 /* All text och formulär ska använda Montserrat */

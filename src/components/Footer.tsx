@@ -51,7 +51,7 @@ export function Footer() {
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-white/85 hover:text-neon-lime transition-colors"
+                      className="text-white/85 hover:text-neon-lime transition-colors inline-block py-2 -my-1 min-h-[44px] leading-snug"
                     >
                       {link.label}
                     </a>
@@ -73,10 +73,10 @@ export function Footer() {
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/85 hover:text-neon-lime transition-colors p-1 rounded-lg hover:bg-white/10"
+                className="text-white/85 hover:text-neon-lime transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-xl hover:bg-white/10"
                 aria-label={label}
               >
-                <Icon className="w-5 h-5" aria-hidden />
+                <Icon className="w-6 h-6" aria-hidden />
               </a>
             ))}
           </nav>

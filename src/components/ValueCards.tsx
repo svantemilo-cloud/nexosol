@@ -23,7 +23,10 @@ const cards = [
 
 export function ValueCards() {
   return (
-    <section id="om-oss" className="py-16 px-4 sm:px-6 scroll-mt-20">
+    <section
+      id="om-oss"
+      className="py-12 sm:py-16 px-4 sm:px-6 scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px))] md:scroll-mt-24"
+    >
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {cards.map((card, i) => (
