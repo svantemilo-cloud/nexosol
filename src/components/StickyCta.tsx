@@ -35,10 +35,10 @@ export function StickyCta() {
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-md border-b border-forest/10 shadow-soft safe-area-top">
         {/* Mobil: logga + primär CTA + meny */}
-        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 flex md:hidden items-center gap-2 min-h-[3.25rem] py-1.5">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 flex md:hidden items-center h-14 gap-2">
           <Link
             href="/"
-            className="font-bold text-forest text-lg flex items-center gap-1.5 shrink-0 min-h-[44px] min-w-0 max-w-[42%] justify-start pr-1 -ml-1 pl-1 rounded-xl hover:bg-forest/5 transition-colors"
+            className="font-bold text-forest text-base sm:text-lg flex flex-1 min-w-0 items-center gap-2 py-2 rounded-xl hover:bg-forest/5 transition-colors"
             onClick={() => setMenuOpen(false)}
           >
             <Sun className="w-6 h-6 text-forest shrink-0" aria-hidden />
@@ -46,14 +46,14 @@ export function StickyCta() {
           </Link>
           <Link
             href="/#calculator"
-            className="ml-auto shrink-0 rounded-2xl bg-forest text-white text-sm font-semibold px-4 py-2.5 min-h-[44px] inline-flex items-center justify-center shadow-soft active:scale-[0.98] transition-transform"
+            className="shrink-0 rounded-xl bg-forest text-white text-sm font-semibold px-3.5 py-2.5 inline-flex items-center justify-center shadow-soft"
             onClick={() => setMenuOpen(false)}
           >
             Offert
           </Link>
           <button
             type="button"
-            className="shrink-0 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-xl border border-forest/15 bg-white text-forest hover:bg-forest/5 transition-colors"
+            className="shrink-0 w-11 h-11 inline-flex items-center justify-center rounded-xl border border-forest/15 bg-white text-forest hover:bg-forest/5 transition-colors"
             aria-expanded={menuOpen}
             aria-controls="mobile-nav-drawer"
             aria-label={menuOpen ? "Stäng meny" : "Öppna meny"}

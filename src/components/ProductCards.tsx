@@ -29,10 +29,7 @@ const products = [
 
 export function ProductCards() {
   return (
-    <section
-      id="products"
-      className="py-12 sm:py-16 px-4 sm:px-6 scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px))] md:scroll-mt-24"
-    >
+    <section id="products" className="py-16 px-4 sm:px-6 scroll-mt-24">
       <div className="max-w-6xl mx-auto">
         <motion.h2
           initial={{ opacity: 0, y: 12 }}

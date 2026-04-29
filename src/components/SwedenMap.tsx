@@ -10,7 +10,7 @@ export function SwedenMap() {
   const [hoverLan, setHoverLan] = useState<string | null>(null);
 
   return (
-    <section className="py-12 sm:py-16 px-4 sm:px-6 bg-surface scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px))] md:scroll-mt-24">
+    <section className="py-16 px-4 sm:px-6 bg-surface scroll-mt-24">
       <div className="max-w-2xl mx-auto">
         <h2 className="text-2xl font-bold text-forest mb-2">
           Var finns du?

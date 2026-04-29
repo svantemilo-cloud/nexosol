@@ -7,7 +7,7 @@ import Image from "next/image";
  */
 export function CompareCard() {
   return (
-    <section className="px-3 sm:px-4 md:px-6 py-10 sm:py-12 scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px))] md:scroll-mt-24">
+    <section className="px-3 sm:px-4 md:px-6 py-10 sm:py-12 scroll-mt-24">
       <div className="max-w-6xl mx-auto">
         <div
           className="overflow-hidden rounded-[2rem] flex flex-col md:flex-row min-h-[340px] md:min-h-0"
@@ -29,7 +29,7 @@ export function CompareCard() {
             </p>
             <Link
               href="#calculator"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-coral text-white font-semibold text-base sm:text-lg px-6 sm:px-8 py-4 min-h-[52px] w-full sm:w-auto hover:opacity-95 active:scale-[0.99] transition-transform"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-coral text-white font-semibold text-lg px-8 py-4 w-full sm:w-auto hover:opacity-95 transition-opacity"
             >
               Starta jämförelsen →
             </Link>
