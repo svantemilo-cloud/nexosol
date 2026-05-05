@@ -10,7 +10,7 @@ const montserrat = Montserrat({
   variable: "--font-sans",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nexosol.se";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.nexosol.se";
 const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
 export const viewport: Viewport = {
@@ -60,31 +60,16 @@ export const metadata: Metadata = {
     title: "Nexosol – Jämför & Spara med grön el",
     description:
       "Få upp till 4 offerter från kvalitetssäkrade installatörer. Helt kostnadsfritt på under 2 minuter.",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Nexosol – Din väg till grön el",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Nexosol – Jämför & Spara med grön el",
     description:
       "Få upp till 4 offerter från kvalitetssäkrade installatörer. Helt kostnadsfritt på under 2 minuter.",
-    images: ["/og-image.jpg"],
   },
   icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/icon.svg", type: "image/svg+xml" },
-    ],
-    apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180" },
-      { url: "/icon.svg", sizes: "any", type: "image/svg+xml" },
-    ],
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
   },
   other: {
     "format-detection": "telephone=no",
@@ -104,28 +89,6 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "PostalAddress",
-      "@id": `${siteUrl}/#postal-address`,
-      streetAddress: "Exempelgatan 1",
-      addressLocality: "Stockholm",
-      postalCode: "111 22",
-      addressCountry: "SE",
-    },
-    {
-      "@type": "Place",
-      "@id": `${siteUrl}/#place`,
-      name: "Nexosol",
-      address: { "@id": `${siteUrl}/#postal-address` },
-    },
-    {
-      "@type": "Person",
-      "@id": `${siteUrl}/#person`,
-      name: "Nexosol Kundservice",
-      jobTitle: "Kundservice",
-      worksFor: { "@id": `${siteUrl}/#organization` },
-      email: "kontakt@nexosol.se",
-    },
-    {
       "@type": "Organization",
       "@id": `${siteUrl}/#organization`,
       name: "Nexosol",
@@ -136,8 +99,7 @@ const jsonLd = {
       },
       description:
         "Nexosol hjälper dig jämföra och spara med grön el – få upp till 4 offerter från kvalitetssäkrade solcellsinstallatörer.",
-      address: { "@id": `${siteUrl}/#postal-address` },
-      location: { "@id": `${siteUrl}/#place` },
+      areaServed: { "@type": "Country", name: "Sweden" },
       contactPoint: {
         "@type": "ContactPoint",
         contactType: "customer service",

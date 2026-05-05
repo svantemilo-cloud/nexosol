@@ -9,7 +9,7 @@ import {
 import { ArticleBody } from "@/components/ArticleBody";
 import { Sun, ArrowLeft, Calendar } from "lucide-react";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nexosol.se";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.nexosol.se";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: article.description,
       url,
       type: "article",
+      locale: "sv_SE",
       publishedTime: article.date,
     },
     twitter: {
@@ -43,25 +44,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 function ArticleJsonLd({ article }: { article: Article }) {
+  const pageUrl = `${siteUrl}/artiklar/${article.slug}`;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: article.title,
     description: article.description,
     datePublished: article.date,
+    inLanguage: "sv-SE",
+    url: pageUrl,
     author: {
       "@type": "Organization",
       name: "Nexosol",
       url: siteUrl,
+      logo: { "@type": "ImageObject", url: `${siteUrl}/icon.svg` },
     },
     publisher: {
       "@type": "Organization",
       name: "Nexosol",
       url: siteUrl,
+      logo: { "@type": "ImageObject", url: `${siteUrl}/icon.svg` },
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `${siteUrl}/artiklar/${article.slug}`,
+      "@id": pageUrl,
     },
   };
   return (

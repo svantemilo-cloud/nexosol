@@ -7,8 +7,6 @@ import { ProductCards } from "@/components/ProductCards";
 import { AnimatedStats } from "@/components/AnimatedStats";
 import { Calculator } from "@/components/Calculator";
 import { HowItWorks } from "@/components/HowItWorks";
-import { SwedenMap } from "@/components/SwedenMap";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LatestArticles } from "@/components/LatestArticles";
 import { Faq } from "@/components/Faq";
 import { Footer } from "@/components/Footer";
@@ -25,10 +23,6 @@ export default function Home() {
       <AnimatedStats />
       <Calculator />
       <HowItWorks />
-      {/* Emergency reset: Kartan inuti ErrorBoundary – vid krasch visas fallback, resten av sidan laddas. För test: kommentera ut <SwedenMap /> nedan. */}
-      <ErrorBoundary>
-        <SwedenMap />
-      </ErrorBoundary>
       <LatestArticles />
       <Faq />
       <Footer />

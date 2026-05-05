@@ -12,7 +12,7 @@ interface State {
 }
 
 /**
- * Fångar kraschar i barn-komponenter (t.ex. SwedenMap) så att resten av sidan fortsätter att visas.
+ * Fångar kraschar i barn-komponenter så att resten av sidan fortsätter att visas.
  */
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {

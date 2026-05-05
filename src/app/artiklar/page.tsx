@@ -3,17 +3,28 @@ import Link from "next/link";
 import { articles } from "@/lib/articles";
 import { Sun, ArrowRight, Calendar } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "Kunskapsbank – Guider om solceller och solel",
-  description:
-    "Läs guider om solcellspriser, lönsamhet, underhåll och vilka tak som passar. Nexosols kunskapsbank hjälper dig ta rätt beslut om solceller.",
-  openGraph: {
-    title: "Kunskapsbank – Guider om solceller | Nexosol",
-    description:
-      "Guider om solceller: pris, storlek, lönsamhet, underhåll och tak. Läs och jämför sedan offerter från kvalitetssäkrade installatörer.",
-    url: "/artiklar",
-  },
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: { q?: string };
+}): Promise<Metadata> {
+  const hasSearch = Boolean(searchParams?.q?.trim());
+  const title = "Kunskapsbank – Guider om solceller och solel";
+  const description =
+    "Läs guider om solcellspriser, lönsamhet, underhåll och vilka tak som passar. Nexosols kunskapsbank hjälper dig ta rätt beslut om solceller.";
+  return {
+    title,
+    description,
+    alternates: { canonical: "/artiklar" },
+    ...(hasSearch ? { robots: { index: false, follow: true } } : {}),
+    openGraph: {
+      title: "Kunskapsbank – Guider om solceller | Nexosol",
+      description:
+        "Guider om solceller: pris, storlek, lönsamhet, underhåll och tak. Läs och jämför sedan offerter från kvalitetssäkrade installatörer.",
+      url: "/artiklar",
+    },
+  };
+}
 
 function matchSearch(article: (typeof articles)[0], q: string) {
   const term = q.toLowerCase().trim();
