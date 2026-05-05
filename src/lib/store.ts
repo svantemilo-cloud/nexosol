@@ -66,38 +66,11 @@ export type AdminUserRecord = {
   pod?: AdminUserId;
 };
 
-export type RobotHead = "round" | "square" | "hex";
-export type RobotBody = "box" | "tank" | "hover";
-export type RobotEyes = "dots" | "visor" | "happy" | "mono";
-export type RobotMouth = "smile" | "grill" | "zigzag" | "neutral";
-export type RobotAccessory = "none" | "solarPanel" | "antenna" | "wrench" | "leaf";
-export type RobotPose = "idle" | "wave" | "handsUp";
-
-export type RobotAvatarConfig = {
-  head: RobotHead;
-  body: RobotBody;
-  eyes: RobotEyes;
-  mouth: RobotMouth;
-  accessory: RobotAccessory;
-  pose: RobotPose;
-  colors: {
-    primary: string; // base
-    secondary: string; // details
-    accent: string; // highlights
-  };
-};
-
-export type RobotProfile = {
-  avatar: RobotAvatarConfig;
-  quotes: string[]; // 3–5
-};
-
 declare global {
   var __submissions: Submission[] | undefined;
   var __visits: Visit[] | undefined;
   var __partners: Partner[] | undefined;
   var __profilePictures: Partial<Record<AdminUserId, string>> | undefined;
-  var __robotProfiles: Partial<Record<AdminUserId, RobotProfile>> | undefined;
   var __adminUsers: AdminUserRecord[] | undefined;
 }
 
@@ -142,69 +115,11 @@ const DEFAULT_PROFILE_PICTURES: Partial<Record<AdminUserId, string>> = {
   leon: "/profiles/leon.png",
 };
 
-const DEFAULT_ROBOT_PROFILES: Partial<Record<AdminUserId, RobotProfile>> = {
-  leon: {
-    avatar: {
-      head: "round",
-      body: "box",
-      eyes: "visor",
-      mouth: "smile",
-      accessory: "solarPanel",
-      pose: "idle",
-      colors: { primary: "#0f3d2e", secondary: "#18a37f", accent: "#b8e986" },
-    },
-    quotes: [
-      "En lead i taget.",
-      "Ring smart, boka hårt.",
-      "Solen skiner på den som följer upp.",
-    ],
-  },
-  vincent: {
-    avatar: {
-      head: "hex",
-      body: "hover",
-      eyes: "happy",
-      mouth: "grill",
-      accessory: "antenna",
-      pose: "idle",
-      colors: { primary: "#1f2937", secondary: "#60a5fa", accent: "#f59e0b" },
-    },
-    quotes: [
-      "Fokus: kvalitet före kvantitet.",
-      "Boka möten som en maskin.",
-      "Allt går med rätt pitch.",
-    ],
-  },
-  wilmer: {
-    avatar: {
-      head: "square",
-      body: "tank",
-      eyes: "mono",
-      mouth: "zigzag",
-      accessory: "leaf",
-      pose: "idle",
-      colors: { primary: "#111827", secondary: "#34d399", accent: "#22c55e" },
-    },
-    quotes: [
-      "Lugn. Tydlig. Effektiv.",
-      "Följ upp – det är där vinsten bor.",
-      "Solcellskraft på schemat.",
-    ],
-  },
-};
-
 function getProfilePicturesMap(): Partial<Record<AdminUserId, string>> {
   if (typeof globalThis.__profilePictures === "undefined") {
     globalThis.__profilePictures = { ...DEFAULT_PROFILE_PICTURES };
   }
   return globalThis.__profilePictures;
-}
-
-function getRobotProfilesMap(): Partial<Record<AdminUserId, RobotProfile>> {
-  if (typeof globalThis.__robotProfiles === "undefined") {
-    globalThis.__robotProfiles = { ...DEFAULT_ROBOT_PROFILES };
-  }
-  return globalThis.__robotProfiles;
 }
 
 function getAdminUsersList(): AdminUserRecord[] {
@@ -395,16 +310,6 @@ export const store = {
     } else {
       map[userId] = imageUrl.trim();
     }
-  },
-
-  getRobotProfiles(): Partial<Record<AdminUserId, RobotProfile>> {
-    const map = getRobotProfilesMap();
-    return { ...DEFAULT_ROBOT_PROFILES, ...map };
-  },
-
-  setRobotProfile(userId: AdminUserId, profile: RobotProfile): void {
-    const map = getRobotProfilesMap();
-    map[userId] = profile;
   },
 
   getAdminUsers(): AdminUserRecord[] {
