@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { PenLine, MailCheck, Scale, type LucideIcon } from "lucide-react";
 import { howItWorksHeading, howItWorksSteps } from "@/lib/how-it-works";
+import { QuoteQuizLink } from "@/components/quote-quiz/QuoteQuizLink";
 
 const STEP_ICONS: Record<number, LucideIcon> = {
   1: PenLine,
@@ -67,12 +68,12 @@ export function HowItWorks() {
           viewport={{ once: true }}
           className="text-center mt-10"
         >
-          <a
+          <QuoteQuizLink
             href="#calculator"
             className="inline-flex items-center justify-center rounded-2xl bg-forest text-white font-semibold px-8 py-3.5 shadow-soft hover:shadow-soft-lg transition-all hover:bg-forest-light"
           >
             Få prisförslag
-          </a>
+          </QuoteQuizLink>
         </motion.div>
       </div>
     </section>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { QuoteQuizLink } from "@/components/quote-quiz/QuoteQuizLink";
 
 const INFO_LINKS = [
   { href: "/artiklar", label: "Kunskapsbank" },
@@ -58,12 +59,21 @@ export function MegaMenu() {
               <ul className="space-y-0.5">
                 {INFO_LINKS.map((item) => (
                   <li key={item.label}>
-                    <Link
-                      href={item.href}
-                      className="text-gray-900 hover:text-coral transition-colors cursor-pointer block py-2.5 px-3 -mx-3 rounded-lg hover:bg-gray-50"
-                    >
-                      {item.label}
-                    </Link>
+                    {item.href === "/#calculator" ? (
+                      <QuoteQuizLink
+                        href="/#calculator"
+                        className="text-gray-900 hover:text-coral transition-colors cursor-pointer block py-2.5 px-3 -mx-3 rounded-lg hover:bg-gray-50"
+                      >
+                        {item.label}
+                      </QuoteQuizLink>
+                    ) : (
+                      <Link
+                        href={item.href}
+                        className="text-gray-900 hover:text-coral transition-colors cursor-pointer block py-2.5 px-3 -mx-3 rounded-lg hover:bg-gray-50"
+                      >
+                        {item.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

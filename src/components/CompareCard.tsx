@@ -1,19 +1,12 @@
-import Link from "next/link";
-import { getImageProps } from "next/image";
+import { ResponsivePicture } from "@/components/ResponsivePicture";
+import { QuoteQuizLink } from "@/components/quote-quiz/QuoteQuizLink";
+import { COMPARE_PIC_WIDTHS } from "@/lib/image-variants";
 
 /**
  * Stor CTA-kort med gradientbakgrund, rubrik med accentfärg,
  * underrubrik, knapp och bild – "Jämför 4 offerter på 60 sekunder".
  */
 export function CompareCard() {
-  const { props: compareImg } = getImageProps({
-    src: "/compare-hero.png",
-    alt: "Installatör och kund i samtal framför hus med solceller på taket",
-    width: 1024,
-    height: 682,
-    sizes: "(max-width: 768px) 100vw, 40vw",
-  });
-
   return (
     <section className="px-3 sm:px-4 md:px-6 py-10 sm:py-12 scroll-mt-24">
       <div className="max-w-6xl mx-auto">
@@ -35,21 +28,26 @@ export function CompareCard() {
               Fyll i dina uppgifter en gång — vi matchar dig med lokala
               installatörer som tävlar om ditt projekt.
             </p>
-            <Link
+            <QuoteQuizLink
               href="#calculator"
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-coral text-white font-semibold text-lg px-8 py-4 w-full sm:w-auto hover:opacity-95 transition-opacity"
             >
               Starta jämförelsen →
-            </Link>
+            </QuoteQuizLink>
           </div>
 
           {/* Höger kolumn: bild i rundad container */}
           <div className="relative w-full md:w-[40%] min-h-[280px] md:min-h-[360px] flex-shrink-0">
-            <div className="absolute inset-4 md:inset-6 rounded-2xl overflow-hidden shadow-soft-lg">
-              <img
-                {...compareImg}
+            <div className="absolute inset-4 md:inset-6 rounded-2xl overflow-hidden shadow-soft-lg [&_picture]:contents">
+              <ResponsivePicture
+                basename="/compare-hero"
+                widths={COMPARE_PIC_WIDTHS}
+                sizes="(max-width: 768px) 100vw, 40vw"
+                alt="Installatör och kund i samtal framför hus med solceller på taket"
+                pngSrc="/compare-hero.png"
+                width={1024}
+                height={682}
                 loading="lazy"
-                decoding="async"
                 className="absolute inset-0 h-full w-full object-cover object-center"
               />
             </div>

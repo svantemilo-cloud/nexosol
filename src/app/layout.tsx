@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
+import { ClientProviders } from "@/components/ClientProviders";
 import { ConditionalHeader } from "@/components/ConditionalHeader";
 import { articles } from "@/lib/articles";
 import {
@@ -18,6 +19,8 @@ const montserrat = Montserrat({
   display: "swap",
   variable: "--font-sans",
   preload: false,
+  adjustFontFallback: true,
+  fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.nexosol.se";
@@ -205,8 +208,7 @@ export default function RootLayout({
   return (
     <html lang="sv" className={`scroll-smooth ${montserrat.variable}`}>
       <head>
-        <link rel="stylesheet" href="/nexosol-responsive.css" />
-        {/* Om /_next/static/css inte laddas – minimal fallback (Tailwind + next/font ligger i bundlad CSS). */}
+        {/* Kritisk minimal CSS innan Tailwind-bundlen; mobil-/SEO-media queries ligger i globals.css */}
         <style
           dangerouslySetInnerHTML={{
             __html: `:where(html){font-family:var(--font-sans),ui-sans-serif,system-ui,sans-serif}:where(body){margin:0;background:#f9fafb;color:#065a45}`,
@@ -228,11 +230,13 @@ export default function RootLayout({
             />
           </noscript>
         )}
-        {children}
-        <ConditionalHeader />
+        <ClientProviders>
+          {children}
+          <ConditionalHeader />
+        </ClientProviders>
         {/* GTM och JSON‑LD efter mål för mindre blocking i <head>. */}
         {gtmId ? (
-          <Script id="google-tag-manager" strategy="afterInteractive">
+          <Script id="google-tag-manager" strategy="lazyOnload">
             {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=

@@ -9,6 +9,7 @@ import {
 import { hreflangLanguages } from "@/lib/hreflang";
 import { toIsoDateTimeUtc } from "@/lib/site-dates";
 import { ArticleBody } from "@/components/ArticleBody";
+import { BreadcrumbJsonLd } from "@/components/BreadcrumbJsonLd";
 import { Sun, ArrowLeft, Calendar } from "lucide-react";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.nexosol.se";
@@ -101,6 +102,13 @@ export default async function ArticlePage({ params }: Props) {
   return (
     <>
       <ArticleJsonLd article={article} />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Startsida", path: "/" },
+          { name: "Kunskapsbank", path: "/artiklar" },
+          { name: article.title, path: `/artiklar/${article.slug}` },
+        ]}
+      />
       <main className="min-h-screen bg-surface">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-24 pb-16">
           <Link

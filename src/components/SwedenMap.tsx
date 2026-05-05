@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { EncodedPicture } from "@/components/ResponsivePicture";
 import { useState } from "react";
 import { LAN_PATHS, LAN_CENTERS } from "@/data/sweden-lan-paths";
 
@@ -30,14 +30,18 @@ export function SwedenMap() {
             role="group"
             aria-labelledby="sweden-map-heading"
           >
-            <Image
-              src="/sweden-lan-map.png"
-              alt="Karta över Sveriges län"
-              fill
-              className="object-contain object-center select-none pointer-events-none"
-              sizes="(max-width: 672px) calc(100vw - 3rem), 672px"
-              loading="lazy"
-            />
+            <div className="absolute inset-0 [&_picture]:contents">
+              <EncodedPicture
+                basename="/sweden-lan-map"
+                pngSrc="/sweden-lan-map.png"
+                alt="Karta över Sveriges län"
+                width={280}
+                height={558}
+                sizes="(max-width: 672px) calc(100vw - 3rem), 672px"
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-contain object-center select-none pointer-events-none"
+              />
+            </div>
             <svg
               viewBox="0 0 100 300"
               preserveAspectRatio="xMidYMid meet"

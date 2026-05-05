@@ -6,6 +6,59 @@ import "./calculator-nx.css";
 type RoofKey = "sadel" | "platt" | "pulpet" | "mansard";
 type RegionKey = "norra" | "mellersta" | "sodra" | "skane";
 
+/** Intresse som styr offertval i CRM */
+export type SolutionKey = "solceller" | "batteri" | "kombination";
+
+export const CALCULATOR_TOTAL_STEPS = 5;
+
+export type CalculatorProps = {
+  variant?: "page" | "modal";
+  onRequestClose?: () => void;
+  /** Förifyll steg 1 när quiz öppnas från en produkt-CTA */
+  initialSolution?: SolutionKey | null;
+};
+
+const SOLUTION_LABELS: Record<SolutionKey, string> = {
+  solceller: "Solceller",
+  batteri: "Solcellsbatteri",
+  kombination: "Solceller och batteri",
+};
+
+function solutionToLeadPayload(solution: SolutionKey) {
+  switch (solution) {
+    case "solceller":
+      return {
+        includeBattery: false,
+        offertChoices: {
+          paneler: true,
+          batteri: false,
+          vaxelriktare: true,
+          komplett: false,
+        },
+      };
+    case "batteri":
+      return {
+        includeBattery: true,
+        offertChoices: {
+          paneler: false,
+          batteri: true,
+          vaxelriktare: false,
+          komplett: false,
+        },
+      };
+    default:
+      return {
+        includeBattery: true,
+        offertChoices: {
+          paneler: true,
+          batteri: true,
+          vaxelriktare: true,
+          komplett: true,
+        },
+      };
+  }
+}
+
 const ROOF_M: Record<RoofKey, number> = {
   sadel: 1.0,
   platt: 0.95,
@@ -51,8 +104,18 @@ function fmt(n: number): string {
   return Math.round(n).toLocaleString("sv-SE");
 }
 
-export function Calculator() {
+const TOTAL_STEPS = CALCULATOR_TOTAL_STEPS;
+
+export function Calculator({
+  variant = "page",
+  onRequestClose,
+  initialSolution = null,
+}: CalculatorProps) {
   const [currentStep, setCurrentStep] = useState(1);
+  const [solutionInterest, setSolutionInterest] = useState<SolutionKey | null>(
+    initialSolution ?? null,
+  );
+  const [addressError, setAddressError] = useState(false);
   const [consumption, setConsumption] = useState(10000);
   const [roofArea, setRoofArea] = useState(50);
   const [roofType, setRoofType] = useState<RoofKey>("sadel");
@@ -101,8 +164,23 @@ export function Calculator() {
   }, [consumption, roofArea, roofType, region]);
 
   const navigate = useCallback((dir: number) => {
-    setCurrentStep((s) => Math.max(1, Math.min(3, s + dir)));
+    setCurrentStep((s) => Math.max(1, Math.min(TOTAL_STEPS, s + dir)));
   }, []);
+
+  const tryGoNext = useCallback(() => {
+    if (currentStep === 1) {
+      if (!solutionInterest) return;
+    }
+    if (currentStep === 2) {
+      const a = address.trim();
+      if (a.length < 4) {
+        setAddressError(true);
+        return;
+      }
+      setAddressError(false);
+    }
+    navigate(1);
+  }, [currentStep, solutionInterest, address, navigate]);
 
   const focusEmail = useCallback(() => {
     emailRef.current?.focus();
@@ -111,6 +189,13 @@ export function Calculator() {
 
   const submitLead = useCallback(async () => {
     const em = email.trim();
+    const addr = address.trim();
+    if (addr.length < 4) {
+      setAddressError(true);
+      setCurrentStep(2);
+      return;
+    }
+    setAddressError(false);
     if (!em) {
       setEmailError(true);
       emailRef.current?.focus();
@@ -120,25 +205,23 @@ export function Calculator() {
     setSubmitStatus("sending");
     setSubmitErrorDetail(null);
 
+    const sol = solutionInterest ?? "solceller";
+    const leadOpts = solutionToLeadPayload(sol);
     const payload = {
       firstName: firstName.trim() || undefined,
       lastName: lastName.trim() || undefined,
       email: em,
       phone: phone.trim() || undefined,
-      address: address.trim() || "",
+      address: addr,
       consumptionKwh: calc.c,
       roofAreaM2: calc.r,
       roofType: roofKeyToApi(roofType),
       region: regionKeyToApi(region),
-      includeBattery: false,
-      offertChoices: {
-        paneler: true,
-        batteri: false,
-        vaxelriktare: true,
-        komplett: false,
-      },
+      includeBattery: leadOpts.includeBattery,
+      offertChoices: leadOpts.offertChoices,
       estimatedProductionKwh: Math.round(calc.prod),
       estimatedRoiYears: Number(calc.payback.toFixed(1)),
+      requestedSolution: sol,
       _nx_hp: nxHp,
     };
 
@@ -174,38 +257,70 @@ export function Calculator() {
     } catch {
       setSubmitStatus("error");
     }
-  }, [calc, firstName, lastName, email, phone, address, roofType, region, nxHp]);
+  }, [calc, firstName, lastName, email, phone, address, roofType, region, nxHp, solutionInterest]);
 
   const stepLabels = [
-    "Steg 1 av 3 — Din förbrukning",
-    "Steg 2 av 3 — Din plats & system",
-    "Steg 3 av 3 — Din gratis offert",
+    "Steg 1 av 5 — Vilken lösning intresserar dig?",
+    "Steg 2 av 5 — Din adress",
+    "Steg 3 av 5 — Din förbrukning och tak",
+    "Steg 4 av 5 — Din plats & system",
+    "Steg 5 av 5 — Din gratis offert",
   ];
 
+  const progressPct = showSuccess
+    ? 100
+    : Math.round((currentStep / TOTAL_STEPS) * 100);
+
+  const rootClass =
+    variant === "modal"
+      ? "nx-calculator-root nx-calculator--modal py-4 px-2 sm:px-3 bg-transparent"
+      : "nx-calculator-root py-10 px-4 sm:px-6 scroll-mt-24 bg-[#f4f6f4]";
+
+  const Root = variant === "page" ? "section" : "div";
+
   return (
-    <section
-      id="calculator"
-      className="nx-calculator-root py-10 px-4 sm:px-6 scroll-mt-24 bg-[#f4f6f4]"
-    >
+    <Root {...(variant === "page" ? { id: "calculator" } : {})} className={rootClass}>
       <div className="nx-wrap">
-        <div className="nx-logo">
-          <svg className="nx-logo-sun" viewBox="0 0 28 28" fill="none" aria-hidden>
-            <circle cx="14" cy="14" r="5" fill="currentColor" />
-            <g stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="14" y1="2" x2="14" y2="5" />
-              <line x1="14" y1="23" x2="14" y2="26" />
-              <line x1="2" y1="14" x2="5" y2="14" />
-              <line x1="23" y1="14" x2="26" y2="14" />
-              <line x1="5.5" y1="5.5" x2="7.6" y2="7.6" />
-              <line x1="20.4" y1="20.4" x2="22.5" y2="22.5" />
-              <line x1="22.5" y1="5.5" x2="20.4" y2="7.6" />
-              <line x1="7.6" y1="20.4" x2="5.5" y2="22.5" />
-            </g>
-          </svg>
-          <span className="nx-logo-text">Nexosol</span>
-        </div>
+        {variant === "page" ? (
+          <div className="nx-logo">
+            <svg className="nx-logo-sun" viewBox="0 0 28 28" fill="none" aria-hidden>
+              <circle cx="14" cy="14" r="5" fill="currentColor" />
+              <g stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="14" y1="2" x2="14" y2="5" />
+                <line x1="14" y1="23" x2="14" y2="26" />
+                <line x1="2" y1="14" x2="5" y2="14" />
+                <line x1="23" y1="14" x2="26" y2="14" />
+                <line x1="5.5" y1="5.5" x2="7.6" y2="7.6" />
+                <line x1="20.4" y1="20.4" x2="22.5" y2="22.5" />
+                <line x1="22.5" y1="5.5" x2="20.4" y2="7.6" />
+                <line x1="7.6" y1="20.4" x2="5.5" y2="22.5" />
+              </g>
+            </svg>
+            <span className="nx-logo-text">Nexosol</span>
+          </div>
+        ) : null}
 
         <div className="nx-card">
+          {variant === "modal" ? (
+            <div
+              className="nx-quiz-progress"
+              role="progressbar"
+              aria-valuenow={progressPct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`Framsteg ${progressPct} procent`}
+            >
+              <div
+                className="nx-quiz-progress-fill"
+                style={{
+                  width: `${progressPct}%`,
+                  minWidth: progressPct > 0 ? "2.25rem" : undefined,
+                }}
+              >
+                <span className="nx-quiz-progress-label">{progressPct}%</span>
+              </div>
+            </div>
+          ) : null}
           <div className="nx-card-header">
             <h2 className="nx-card-title">Vad kostar solceller för dig?</h2>
             <div className="nx-card-sub">
@@ -225,8 +340,10 @@ export function Calculator() {
           {!showSuccess && (
             <>
               <div className="nx-body" id="mainBody">
-                <div className="nx-steps">
-                  {[1, 2, 3].map((i) => (
+                <div
+                  className={`nx-steps${variant === "modal" ? " nx-steps--modal-hide" : ""}`}
+                >
+                  {[1, 2, 3, 4, 5].map((i) => (
                     <div
                       key={i}
                       className={`nx-step-pip ${i < currentStep ? "done" : ""} ${i === currentStep ? "active" : ""}`}
@@ -236,6 +353,80 @@ export function Calculator() {
                 <div className="nx-step-label">{stepLabels[currentStep - 1]}</div>
 
                 <div className={`nx-step ${currentStep === 1 ? "active" : ""}`}>
+                  <h3 className="nx-step-heading">Välj det du vill ha offert på</h3>
+                  <p className="nx-card-sub text-left mb-4 !text-[13px] !leading-snug">
+                    Du kan ändra dig senare — vi matchar dig med rätt installatörer.
+                  </p>
+                  {(
+                    [
+                      {
+                        key: "solceller" as const,
+                        icon: "☀️",
+                        label: "Solceller",
+                        sub: "Paneler på taket – producera egen el",
+                      },
+                      {
+                        key: "batteri" as const,
+                        icon: "🔋",
+                        label: "Solcellsbatteri",
+                        sub: "Lagra el – passar dig som redan har solceller eller vill komplettera",
+                      },
+                      {
+                        key: "kombination" as const,
+                        icon: "⚡",
+                        label: "Solceller och batteri",
+                        sub: "Komplett system med paneler och lagring",
+                      },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      className={`nx-option-row ${solutionInterest === opt.key ? "selected" : ""}`}
+                      onClick={() => setSolutionInterest(opt.key)}
+                    >
+                      <div className="nx-option-left">
+                        <div className="nx-option-icon">{opt.icon}</div>
+                        <div>
+                          <div className="nx-option-label">{opt.label}</div>
+                          <div className="nx-option-sub">{opt.sub}</div>
+                        </div>
+                      </div>
+                      <span className="nx-option-arrow">›</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className={`nx-step ${currentStep === 2 ? "active" : ""}`}>
+                  <h3 className="nx-step-heading">Var ska installationen ske?</h3>
+                  <p className="nx-card-sub text-left mb-4 !text-[13px] !leading-snug">
+                    Ange adress så kan lokala installatörer ge relevant offert.
+                  </p>
+                  <div className="nx-form-group">
+                    <label className="nx-form-label" htmlFor="nx-address">
+                      Adress (gata, postnummer och ort)
+                    </label>
+                    <input
+                      id="nx-address"
+                      className={`nx-input ${addressError ? "nx-input-error" : ""}`}
+                      type="text"
+                      autoComplete="street-address"
+                      placeholder="Exempelgatan 12, 123 45 Stad"
+                      value={address}
+                      onChange={(e) => {
+                        setAddress(e.target.value);
+                        setAddressError(false);
+                      }}
+                    />
+                    {addressError ? (
+                      <p className="text-xs text-red-600 mt-1.5">
+                        Fyll i en fullständig adress för att gå vidare.
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className={`nx-step ${currentStep === 3 ? "active" : ""}`}>
                   <div className="nx-slider-group">
                     <div className="nx-slider-row">
                       <label htmlFor="nx-consumption" className="nx-slider-name">
@@ -299,7 +490,7 @@ export function Calculator() {
                   ))}
                 </div>
 
-                <div className={`nx-step ${currentStep === 2 ? "active" : ""}`}>
+                <div className={`nx-step ${currentStep === 4 ? "active" : ""}`}>
                   <h3 className="nx-step-heading">Välj din region</h3>
                   {(
                     [
@@ -341,7 +532,7 @@ export function Calculator() {
                   </div>
                 </div>
 
-                <div className={`nx-step ${currentStep === 3 ? "active" : ""}`}>
+                <div className={`nx-step ${currentStep === 5 ? "active" : ""}`}>
                   <div className="offert-hero">
                     <div className="offert-hero-tag">✦ Din personliga offert</div>
                     <div className="offert-hero-amount">{fmt(calc.savings)} kr</div>
@@ -371,6 +562,20 @@ export function Calculator() {
                   <div className="offert-locked-wrapper" role="button" tabIndex={0} onClick={focusEmail} onKeyDown={(e) => e.key === "Enter" && focusEmail()}>
                     <div className="offert-locked-content">
                       <h3 className="offert-summary-title">Din offert</h3>
+                      {solutionInterest ? (
+                        <div className="offert-line">
+                          <span>Vald lösning</span>
+                          <span className="offert-line-val">{SOLUTION_LABELS[solutionInterest]}</span>
+                        </div>
+                      ) : null}
+                      {address.trim() ? (
+                        <div className="offert-line">
+                          <span>Adress</span>
+                          <span className="offert-line-val text-right max-w-[65%] truncate" title={address.trim()}>
+                            {address.trim()}
+                          </span>
+                        </div>
+                      ) : null}
                       <div className="offert-line">
                         <span>Förbrukning</span>
                         <span className="offert-line-val">{fmt(calc.c)} kWh/år</span>
@@ -489,19 +694,6 @@ export function Calculator() {
                       onChange={(e) => setPhone(e.target.value)}
                     />
                   </div>
-                  <div className="nx-form-group">
-                    <label className="nx-form-label" htmlFor="nx-address">
-                      Adress (valfritt)
-                    </label>
-                    <input
-                      id="nx-address"
-                      className="nx-input"
-                      type="text"
-                      placeholder="Gatuadress, postnummer och ort"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                    />
-                  </div>
 
                   <div className="nx-honeypot">
                     <label htmlFor="nx-hp" className="nx-honeypot-label">
@@ -550,12 +742,17 @@ export function Calculator() {
                   ← Tillbaka
                 </button>
                 <span className="nx-footer-note">
-                  {currentStep < 3
+                  {currentStep < TOTAL_STEPS
                     ? "Gratis · Ingen bindning · 60 sekunder"
                     : "🔒 Dina uppgifter är säkra"}
                 </span>
-                {currentStep < 3 && (
-                  <button type="button" className="nx-nav-btn primary" onClick={() => navigate(1)}>
+                {currentStep < TOTAL_STEPS && (
+                  <button
+                    type="button"
+                    className="nx-nav-btn primary"
+                    onClick={tryGoNext}
+                    disabled={currentStep === 1 && !solutionInterest}
+                  >
                     Nästa →
                   </button>
                 )}
@@ -594,9 +791,18 @@ export function Calculator() {
             <div className="success-next">
               Nästa steg: Kolla din e-post · Jämför offerter · Välj installatör
             </div>
+            {variant === "modal" && onRequestClose ? (
+              <button
+                type="button"
+                className="nx-modal-done-btn"
+                onClick={onRequestClose}
+              >
+                Stäng
+              </button>
+            ) : null}
           </div>
         </div>
       </div>
-    </section>
+    </Root>
   );
 }

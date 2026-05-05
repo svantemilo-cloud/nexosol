@@ -1,5 +1,7 @@
-import { getImageProps } from "next/image";
-import { Sun, Check, ChevronRight, PanelTop, Battery } from "lucide-react";
+import { Sun, Check } from "lucide-react";
+import { ResponsivePicture } from "@/components/ResponsivePicture";
+import { HERO_PIC_WIDTHS } from "@/lib/image-variants";
+import { HeroQuoteCard } from "@/components/HeroQuoteCard";
 
 const bullets = [
   "Endast trygga installatörer",
@@ -7,46 +9,22 @@ const bullets = [
   "Spar värdefull tid",
 ];
 
-const productOptions = [
-  {
-    href: "#calculator",
-    label: "Solceller med batteri",
-    icon: PanelTop,
-    sub: "Komplett system med energilagring",
-  },
-  {
-    href: "#calculator",
-    label: "Endast solcellsanläggning",
-    icon: Sun,
-    sub: "Solpaneler till ditt hem",
-  },
-  {
-    href: "#calculator",
-    label: "Endast solcellsbatteri",
-    icon: Battery,
-    sub: "Energilagring till befintlig anläggning",
-  },
-];
-
 export function Hero() {
-  const { props: heroImg } = getImageProps({
-    src: "/hero-solar.png",
-    alt: "",
-    width: 1024,
-    height: 580,
-    priority: true,
-    sizes: "(max-width: 1280px) 100vw, 1280px",
-  });
-
   return (
     <section className="relative overflow-hidden max-md:mt-0 max-md:pt-[max(5.5rem,calc(3.5rem+env(safe-area-inset-top,0px)))] max-md:pb-14 md:-mt-16 md:min-h-screen md:pt-28 md:pb-24">
-      {/* Bakgrundsbild täcker hela första sektionen – vanlig img + srcset (synlig för enkla SEO-crawlers) */}
-      <div className="absolute inset-0 z-0" aria-hidden>
-        <img
-          {...heroImg}
-          className="absolute inset-0 h-full w-full object-cover object-center"
-          decoding="async"
+      {/* AVIF/WebP + srcset för moderna format; PNG som fallback på <img> */}
+      <div className="absolute inset-0 z-0 [&_picture]:contents" aria-hidden>
+        <ResponsivePicture
+          basename="/hero-solar"
+          widths={HERO_PIC_WIDTHS}
+          sizes="(max-width: 1280px) 100vw, 1280px"
+          alt=""
+          pngSrc="/hero-solar.png"
+          width={1024}
+          height={580}
+          loading="eager"
           fetchPriority="high"
+          className="absolute inset-0 h-full w-full object-cover object-center"
         />
         {/* Gradient från vänster så att text är läsbar */}
         <div
@@ -91,43 +69,7 @@ export function Hero() {
 
           {/* Right: widget-bubbla ovanpå bakgrundsbilden – centrerad och något nedåt */}
           <div className="order-1 md:order-2 relative min-h-[300px] md:min-h-[380px] flex items-center justify-center pt-8 md:pt-24">
-            <div className="relative w-full max-w-md mx-auto md:mx-2 my-4 rounded-2xl shadow-soft-lg border border-forest/10 bg-white">
-              <div className="p-6 sm:p-8">
-                <h2 className="text-xl font-bold text-forest mb-1">
-                  Vad söker du offert för?
-                </h2>
-                <p className="text-sm text-forest/70 mb-6">
-                  Jämför offerter enkelt, kostnadsfritt och bindningsfritt.
-                </p>
-                <p className="text-sm font-medium text-forest/80 mb-3">
-                  Vad söker du prisförslag för?
-                </p>
-                <div className="space-y-3">
-                  {productOptions.map((opt, i) => (
-                    <a
-                      key={i}
-                      href={opt.href}
-                      className="group flex items-center gap-4 p-4 rounded-xl bg-surface border border-forest/10 hover:border-forest/20 hover:shadow-soft transition-all"
-                    >
-                      <span className="flex-shrink-0 w-10 h-10 rounded-lg bg-forest/10 flex items-center justify-center text-forest group-hover:bg-forest/15">
-                        <opt.icon className="w-5 h-5" />
-                      </span>
-                      <span className="flex-1 font-medium text-forest">
-                        {opt.label}
-                      </span>
-                      <ChevronRight className="w-5 h-5 text-forest/50 group-hover:text-forest group-hover:translate-x-0.5 transition-all" />
-                    </a>
-                  ))}
-                </div>
-                <a
-                  href="#calculator"
-                  className="mt-6 flex items-center justify-center gap-2 w-full rounded-2xl bg-forest text-white font-semibold py-3.5 shadow-soft hover:shadow-soft-lg transition-all hover:bg-forest-light"
-                >
-                  Jämför offerter nu
-                  <ChevronRight className="w-5 h-5" />
-                </a>
-              </div>
-            </div>
+            <HeroQuoteCard />
           </div>
         </div>
       </div>

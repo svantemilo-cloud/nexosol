@@ -1,6 +1,7 @@
 "use client";
 
-import Image from "next/image";
+import { ResponsivePicture } from "@/components/ResponsivePicture";
+import { INSTALLER_LOGO_WIDTHS } from "@/lib/image-variants";
 
 /**
  * Långsamt scrollande rad med installatörslogotyper.
@@ -33,16 +34,18 @@ export function InstallerMarquee() {
               {LOGOS.map((logo) => (
                 <div
                   key={`${copy}-${logo.src}`}
-                  className="flex h-16 w-36 sm:h-20 sm:w-44 shrink-0 items-center justify-center rounded-xl bg-surface p-2 box-border"
+                  className="flex h-16 w-36 sm:h-20 sm:w-44 shrink-0 items-center justify-center rounded-xl bg-surface p-2 box-border [&_picture]:contents"
                 >
-                  <Image
-                    src={logo.src}
+                  <ResponsivePicture
+                    basename={logo.src.replace(/\.png$/i, "")}
+                    widths={INSTALLER_LOGO_WIDTHS}
+                    sizes="(max-width: 640px) 144px, 176px"
                     alt={logo.alt}
+                    pngSrc={logo.src}
                     width={LOGO_SIZE.width}
                     height={LOGO_SIZE.height}
                     loading="lazy"
                     className="max-h-full max-w-full object-contain object-center"
-                    sizes="(max-width: 640px) 144px, 176px"
                   />
                 </div>
               ))}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Sun, Facebook, Linkedin, Twitter } from "lucide-react";
+import { QuoteQuizLink } from "@/components/quote-quiz/QuoteQuizLink";
 
 const socialLinks = [
   { label: "Facebook", href: "https://www.facebook.com/nexosol", icon: Facebook },
@@ -49,12 +50,21 @@ export function Footer() {
               <ul className="space-y-2">
                 {section.links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="text-white/85 hover:text-neon-lime transition-colors"
-                    >
-                      {link.label}
-                    </a>
+                    {link.href === "#calculator" ? (
+                      <QuoteQuizLink
+                        href="#calculator"
+                        className="text-white/85 hover:text-neon-lime transition-colors"
+                      >
+                        {link.label}
+                      </QuoteQuizLink>
+                    ) : (
+                      <a
+                        href={link.href}
+                        className="text-white/85 hover:text-neon-lime transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>

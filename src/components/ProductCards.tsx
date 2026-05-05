@@ -1,8 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { Sun, Battery, Plug, ArrowRight } from "lucide-react";
+import { useQuoteQuiz } from "@/components/quote-quiz/QuoteQuizProvider";
+import { ResponsivePicture } from "@/components/ResponsivePicture";
+import {
+  PRODUCT_CARD_LADDBOX_WIDTHS,
+  PRODUCT_CARD_STANDARD_WIDTHS,
+} from "@/lib/image-variants";
 
 const products = [
   {
@@ -35,6 +40,8 @@ const products = [
 ] as const;
 
 export function ProductCards() {
+  const { openQuiz } = useQuoteQuiz();
+
   return (
     <section id="products" className="py-16 px-4 sm:px-6 scroll-mt-24">
       <div className="max-w-6xl mx-auto">
@@ -54,16 +61,22 @@ export function ProductCards() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.35, delay: i * 0.08 }}
-              className="group relative rounded-2xl overflow-hidden min-h-[320px] sm:min-h-[380px] border border-forest/10 shadow-soft hover:shadow-soft-lg transition-all"
+              className="group relative rounded-2xl overflow-hidden min-h-[320px] sm:min-h-[380px] border border-forest/10 shadow-soft hover:shadow-soft-lg transition-all [&_picture]:contents"
             >
-              <Image
-                src={p.image}
+              <ResponsivePicture
+                basename={p.image.replace(/\.png$/i, "")}
+                widths={
+                  p.image.includes("laddbox")
+                    ? PRODUCT_CARD_LADDBOX_WIDTHS
+                    : PRODUCT_CARD_STANDARD_WIDTHS
+                }
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 alt=""
+                pngSrc={p.image}
                 width={p.width}
                 height={p.height}
                 loading="lazy"
                 className="absolute inset-0 h-full w-full object-cover object-center bg-forest/10"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
               {/* Mörk overlay så att texten är läsbar */}
               <div className="absolute inset-0 bg-gradient-to-t from-forest/90 via-forest/40 to-forest/10" />
@@ -71,6 +84,10 @@ export function ProductCards() {
               <a
                 href={p.link}
                 className="absolute inset-0 flex flex-col justify-end p-6 text-white"
+                onClick={(e) => {
+                  e.preventDefault();
+                  openQuiz();
+                }}
               >
                 <div className="relative z-10">
                   <div className="w-12 h-12 rounded-xl bg-white/90 flex items-center justify-center mb-3 text-forest">

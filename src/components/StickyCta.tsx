@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { Menu, Sun, X } from "lucide-react";
+import { useQuoteQuiz } from "@/components/quote-quiz/QuoteQuizProvider";
 
 const navLinks = [
   { href: "/#products", label: "Lösningar" },
@@ -12,7 +13,14 @@ const navLinks = [
 ] as const;
 
 export function StickyCta() {
+  const { openQuiz } = useQuoteQuiz();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const openCalculatorQuiz = (e: MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    openQuiz();
+    setMenuOpen(false);
+  };
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -47,7 +55,7 @@ export function StickyCta() {
           <Link
             href="/#calculator"
             className="shrink-0 rounded-xl bg-forest text-white text-sm font-semibold px-3.5 py-2.5 inline-flex items-center justify-center shadow-soft"
-            onClick={() => setMenuOpen(false)}
+            onClick={openCalculatorQuiz}
           >
             Offert
           </Link>
@@ -73,18 +81,30 @@ export function StickyCta() {
             Nexosol
           </Link>
           <nav className="flex-1 flex items-center justify-between min-w-0 gap-4">
-            {navLinks.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="font-medium text-forest hover:text-coral transition-colors py-2.5 px-3 -mx-3 rounded-xl hover:bg-forest/5 cursor-pointer text-base"
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navLinks.map((item) =>
+              item.href === "/#calculator" ? (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="font-medium text-forest hover:text-coral transition-colors py-2.5 px-3 -mx-3 rounded-xl hover:bg-forest/5 cursor-pointer text-base"
+                  onClick={openCalculatorQuiz}
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="font-medium text-forest hover:text-coral transition-colors py-2.5 px-3 -mx-3 rounded-xl hover:bg-forest/5 cursor-pointer text-base"
+                >
+                  {item.label}
+                </Link>
+              ),
+            )}
             <Link
               href="/#calculator"
               className="rounded-2xl bg-forest text-white font-semibold px-5 py-2.5 shadow-soft hover:shadow-soft-lg transition-shadow hover:bg-forest-light cursor-pointer"
+              onClick={openCalculatorQuiz}
             >
               Få gratis offert
             </Link>
@@ -120,7 +140,11 @@ export function StickyCta() {
                 key={item.href}
                 href={item.href}
                 className="text-forest font-medium text-lg py-4 px-4 rounded-2xl hover:bg-forest/[0.06] active:bg-forest/10 transition-colors border border-transparent hover:border-forest/10"
-                onClick={() => setMenuOpen(false)}
+                onClick={
+                  item.href === "/#calculator"
+                    ? openCalculatorQuiz
+                    : () => setMenuOpen(false)
+                }
               >
                 {item.label}
               </Link>
@@ -130,7 +154,7 @@ export function StickyCta() {
             <Link
               href="/#calculator"
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-forest text-white font-semibold text-base py-4 min-h-[52px] shadow-soft active:scale-[0.99] transition-transform"
-              onClick={() => setMenuOpen(false)}
+              onClick={openCalculatorQuiz}
             >
               Få gratis offert
             </Link>
