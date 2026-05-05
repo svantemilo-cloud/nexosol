@@ -42,6 +42,10 @@ import {
   UserPlus,
 } from "lucide-react";
 import { type Partner, store } from "@/lib/store";
+import type { AdminUserId, RobotProfile } from "@/lib/store";
+import { RobotAvatar } from "@/components/admin/RobotAvatar";
+import { RobotSpeechBubble } from "@/components/admin/RobotSpeechBubble";
+import { RobotAvatarBuilder } from "@/components/admin/RobotAvatarBuilder";
 
 type AdminSection = "privatkunder" | "foretagskunder" | "partners" | "scoreboard" | "webbtrafik" | "admin";
 type AdminUser = "leon" | "vincent" | "wilmer";
@@ -550,9 +554,10 @@ export default function AdminPage() {
   const [partnerError, setPartnerError] = useState("");
   const [partnerSending, setPartnerSending] = useState(false);
   const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
-  const [profilePictures, setProfilePictures] = useState<Partial<Record<AdminUser, string>>>({});
-  const [editingProfilePicture, setEditingProfilePicture] = useState<AdminUser | null>(null);
-  const [profilePictureDraft, setProfilePictureDraft] = useState("");
+  const [robotProfiles, setRobotProfiles] = useState<Partial<Record<AdminUserId, RobotProfile>>>({});
+  const [robotSaving, setRobotSaving] = useState(false);
+  const [robotError, setRobotError] = useState("");
+  const [robotEditingUserId, setRobotEditingUserId] = useState<AdminUserId>("leon");
   const [adminUsers, setAdminUsers] = useState<{ id: string; createdAt: string; username: string; email: string; displayName?: string }[]>([]);
   const [showAddAdminUser, setShowAddAdminUser] = useState(false);
   const [newAdminUser, setNewAdminUser] = useState({
@@ -601,10 +606,10 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!authenticated) return;
-    fetch("/api/admin/profile-pictures", { credentials: "include" })
+    fetch("/api/admin/robot-avatars", { credentials: "include" })
       .then((r) => (r.ok ? r.json() : {}))
-      .then(setProfilePictures)
-      .catch(() => setProfilePictures({}));
+      .then(setRobotProfiles)
+      .catch(() => setRobotProfiles({}));
   }, [authenticated]);
 
   useEffect(() => {
@@ -637,24 +642,36 @@ export default function AdminPage() {
   const webbtrafikData = useWebbtrafikData(visits, submissions.length);
 
   const adminUser = (currentUser?.pod ?? "leon") as AdminUser;
+  const robotPodId = (currentUser?.pod ?? "leon") as AdminUserId;
   const loggedInAsLabel = currentUser
     ? (currentUser.displayName || currentUser.email)
     : "Admin";
 
-  const saveProfilePicture = useCallback(async (userId: AdminUser, imageUrl: string) => {
-    const res = await fetch("/api/admin/profile-pictures", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ userId, imageUrl }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      setProfilePictures(data);
-      setEditingProfilePicture(null);
-      setProfilePictureDraft("");
-    }
-  }, []);
+  const saveRobotProfile = useCallback(
+    async (userId: AdminUserId | null, profile: RobotProfile) => {
+      setRobotError("");
+      setRobotSaving(true);
+      try {
+        const res = await fetch("/api/admin/robot-avatars", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ userId: userId ?? undefined, ...profile }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setRobotError(data.error || "Kunde inte spara robot");
+          return;
+        }
+        setRobotProfiles(data);
+      } catch {
+        setRobotError("Nätverksfel när robot skulle sparas");
+      } finally {
+        setRobotSaving(false);
+      }
+    },
+    []
+  );
 
   const scoreboardStats = useMemo(() => {
     const pods: AdminUser[] = ["leon", "vincent", "wilmer"];
@@ -681,6 +698,9 @@ export default function AdminPage() {
     );
     return { stats, ranked };
   }, [submissions]);
+
+  const currentRobotProfile: RobotProfile | null =
+    (robotProfiles[robotPodId] as RobotProfile | undefined) ?? null;
 
   const refreshPartners = useCallback(() => {
     fetch("/api/admin/partners", { credentials: "include" })
@@ -1193,40 +1213,35 @@ export default function AdminPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
           {adminSection === "privatkunder" && (
             <>
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center">
-              <FileText className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{submissions.length}</p>
-              <p className="text-sm text-zinc-400">Kalkylator / offertförfrågningar</p>
-            </div>
-          </div>
-          <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center">
-              <Users className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{visits.length}</p>
-              <p className="text-sm text-zinc-400">Besökare (hemsidan)</p>
-            </div>
-          </div>
-          <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-5 flex items-center gap-4 sm:col-span-2 lg:col-span-1">
-            <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-white">Senaste besök</p>
-              <p className="text-xs text-zinc-400">
-                {visits.length
-                  ? formatDate(visits[visits.length - 1].createdAt)
-                  : "—"}
-              </p>
-            </div>
-          </div>
-        </div>
+              {/* Robot-widget (ersätter KPI-korten) */}
+              <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-5 flex items-center gap-4 mb-8">
+                <div className="shrink-0 w-20 h-20 rounded-2xl bg-zinc-800 flex items-center justify-center border border-zinc-700">
+                  {currentRobotProfile ? (
+                    <RobotAvatar
+                      config={currentRobotProfile.avatar}
+                      size="md"
+                      title={`Robot-avatar för ${ADMIN_USER_LABELS.find((u) => u.id === robotPodId)?.label ?? robotPodId}`}
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-zinc-700" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <p className="text-sm text-zinc-400">
+                      Din robot ({ADMIN_USER_LABELS.find((u) => u.id === robotPodId)?.label ?? robotPodId})
+                    </p>
+                    <p className="text-xs text-zinc-500">
+                      {submissions.filter((s) => (s.pod ?? "unassigned") === robotPodId).length} leads i din pod
+                    </p>
+                  </div>
+                  {currentRobotProfile ? (
+                    <RobotSpeechBubble quotes={currentRobotProfile.quotes} className="mt-2" />
+                  ) : (
+                    <p className="mt-2 text-sm text-zinc-500">Gå till Admin → Inställningar för att bygga din robot.</p>
+                  )}
+                </div>
+              </div>
 
         {/* Poddar: en pipeline per pod */}
         <section className="mb-10">
@@ -2012,9 +2027,7 @@ export default function AdminPage() {
                   const height = isFirst ? "h-52" : place === 2 ? "h-40" : "h-36";
                   const medal = place === 1 ? "🥇" : place === 2 ? "🥈" : "🥉";
                   const bg = isFirst ? "bg-amber-500/20 border-amber-500/50" : "bg-zinc-800 border-zinc-600";
-                  const imageUrl = profilePictures[r.podId as AdminUser];
-                  const isEditing = editingProfilePicture === r.podId;
-                  const draft = isEditing ? profilePictureDraft : (imageUrl ?? "");
+                  const rp = robotProfiles[r.podId as AdminUserId] as RobotProfile | undefined;
                   return (
                     <div
                       key={r.podId}
@@ -2022,57 +2035,18 @@ export default function AdminPage() {
                     >
                       <span className="text-lg text-zinc-500 font-bold mb-0.5">#{place}</span>
                       <span className="text-2xl mb-1" aria-hidden>{medal}</span>
-                      <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-zinc-600 bg-zinc-700 shrink-0 flex items-center justify-center mb-2">
-                        <span className="absolute inset-0 flex items-center justify-center text-xl font-bold text-zinc-400">
-                          {r.label.charAt(0)}
-                        </span>
-                        {draft.trim() ? (
-                          <img
-                            src={draft}
-                            alt=""
-                            className="absolute inset-0 w-full h-full object-cover"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                          />
-                        ) : null}
+                      <div
+                        className={
+                          "relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-zinc-700 bg-zinc-950/30 shrink-0 flex items-center justify-center mb-2 " +
+                          (isFirst ? "nx-robot-bob nx-robot-glow" : "nx-robot-bob")
+                        }
+                      >
+                        {rp ? (
+                          <RobotAvatar config={rp.avatar} size={isFirst ? "md" : "md"} title={`Robot-avatar ${r.label}`} />
+                        ) : (
+                          <span className="text-xl font-bold text-zinc-400">{r.label.charAt(0)}</span>
+                        )}
                       </div>
-                      {isEditing ? (
-                        <div className="w-full px-2 space-y-1.5 mb-2">
-                          <input
-                            type="url"
-                            value={profilePictureDraft}
-                            onChange={(e) => setProfilePictureDraft(e.target.value)}
-                            placeholder="Bild-URL"
-                            className="w-full rounded border border-zinc-600 bg-zinc-800 px-2 py-1 text-xs text-white placeholder:text-zinc-500"
-                          />
-                          <div className="flex gap-1 justify-center">
-                            <button
-                              type="button"
-                              onClick={() => saveProfilePicture(r.podId as AdminUser, profilePictureDraft)}
-                              className="rounded bg-emerald-600 px-2 py-1 text-xs text-white hover:bg-emerald-500"
-                            >
-                              Spara
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => { setEditingProfilePicture(null); setProfilePictureDraft(""); }}
-                              className="rounded border border-zinc-600 px-2 py-1 text-xs text-zinc-300"
-                            >
-                              Avbryt
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingProfilePicture(r.podId as AdminUser);
-                            setProfilePictureDraft(imageUrl ?? "");
-                          }}
-                          className="text-xs text-zinc-500 hover:text-white mb-1"
-                        >
-                          Ändra bild
-                        </button>
-                      )}
                       <span className="font-bold text-white text-sm sm:text-base truncate w-full text-center px-1">{r.label}</span>
                       <span className="text-2xl sm:text-3xl font-black text-white mt-1">{r.bookedMeeting}</span>
                       <span className="text-xs text-zinc-400">bokade möten</span>
@@ -2333,6 +2307,50 @@ export default function AdminPage() {
               <div className="flex items-center gap-2">
                 <Settings className="w-6 h-6 text-zinc-400" />
                 <h2 className="text-lg font-semibold text-white">Admin</h2>
+              </div>
+
+              {/* Min robot-avatar */}
+              <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
+                <div className="p-4 border-b border-zinc-800 flex items-center justify-between flex-wrap gap-2">
+                  <h3 className="text-base font-semibold text-white">Min robot-avatar</h3>
+                  {isLegacyAdmin ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-zinc-500">Redigera som</span>
+                      <select
+                        value={robotEditingUserId}
+                        onChange={(e) => setRobotEditingUserId(e.target.value as AdminUserId)}
+                        className="rounded border border-zinc-600 bg-zinc-800 px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                      >
+                        <option value="leon">Leon</option>
+                        <option value="vincent">Vincent</option>
+                        <option value="wilmer">Wilmer</option>
+                      </select>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-zinc-500">Din robot syns på Scoreboard och ovanför pipelinen.</p>
+                  )}
+                </div>
+                <div className="p-4">
+                  {(() => {
+                    const id = isLegacyAdmin ? robotEditingUserId : robotPodId;
+                    const prof = (robotProfiles[id] as RobotProfile | undefined) ?? null;
+                    if (!prof) {
+                      return (
+                        <div className="text-sm text-zinc-500">
+                          Laddar robotprofil…
+                        </div>
+                      );
+                    }
+                    return (
+                      <RobotAvatarBuilder
+                        initial={prof}
+                        saving={robotSaving}
+                        error={robotError}
+                        onSave={(p) => saveRobotProfile(isLegacyAdmin ? id : null, p)}
+                      />
+                    );
+                  })()}
+                </div>
               </div>
 
               {/* Ej tilldelade leads */}
