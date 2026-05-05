@@ -43,9 +43,9 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
           {footerSections.map((section) => (
             <div key={section.title}>
-              <h5 className="font-semibold text-neon-lime mb-4">
+              <h3 className="font-semibold text-neon-lime mb-4">
                 {section.title}
-              </h5>
+              </h3>
               <ul className="space-y-2">
                 {section.links.map((link) => (
                   <li key={link.label}>

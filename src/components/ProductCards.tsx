@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Sun, Battery, Plug, ArrowRight } from "lucide-react";
 
@@ -10,6 +11,8 @@ const products = [
     linkText: "Få offert",
     icon: Sun,
     image: "/products/solceller.png",
+    width: 1024,
+    height: 590,
   },
   {
     title: "Solcellsbatteri",
@@ -17,6 +20,8 @@ const products = [
     linkText: "Få offert",
     icon: Battery,
     image: "/products/solcellsbatteri.png",
+    width: 1024,
+    height: 791,
   },
   {
     title: "Laddbox",
@@ -24,8 +29,10 @@ const products = [
     linkText: "Få offert",
     icon: Plug,
     image: "/products/laddbox.png",
+    width: 768,
+    height: 432,
   },
-];
+] as const;
 
 export function ProductCards() {
   return (
@@ -49,12 +56,14 @@ export function ProductCards() {
               transition={{ duration: 0.35, delay: i * 0.08 }}
               className="group relative rounded-2xl overflow-hidden min-h-[320px] sm:min-h-[380px] border border-forest/10 shadow-soft hover:shadow-soft-lg transition-all"
             >
-              {/* Bakgrundsbild fyller hela kortet */}
-              <div
-                className="absolute inset-0 bg-forest/10 bg-cover bg-center"
-                style={{
-                  backgroundImage: `url(${p.image})`,
-                }}
+              <Image
+                src={p.image}
+                alt=""
+                width={p.width}
+                height={p.height}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover object-center bg-forest/10"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
               {/* Mörk overlay så att texten är läsbar */}
               <div className="absolute inset-0 bg-gradient-to-t from-forest/90 via-forest/40 to-forest/10" />

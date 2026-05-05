@@ -1923,6 +1923,10 @@ export default function AdminPage() {
                               <img
                                 src={p.logoUrl}
                                 alt=""
+                                width={40}
+                                height={40}
+                                loading="lazy"
+                                decoding="async"
                                 className="h-10 w-10 shrink-0 rounded object-contain bg-zinc-800"
                               />
                             ) : (
@@ -2030,7 +2034,11 @@ export default function AdminPage() {
                           <img
                             src={draft}
                             alt=""
-                            className="absolute inset-0 w-full h-full object-cover"
+                            width={64}
+                            height={64}
+                            loading="lazy"
+                            decoding="async"
+                            className="absolute inset-0 h-full w-full object-cover"
                             onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                           />
                         ) : null}

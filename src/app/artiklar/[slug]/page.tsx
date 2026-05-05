@@ -6,6 +6,8 @@ import {
   getAllSlugs,
   type Article,
 } from "@/lib/articles";
+import { hreflangLanguages } from "@/lib/hreflang";
+import { toIsoDateTimeUtc } from "@/lib/site-dates";
 import { ArticleBody } from "@/components/ArticleBody";
 import { Sun, ArrowLeft, Calendar } from "lucide-react";
 
@@ -23,6 +25,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!article) return { title: "Artikel hittades inte" };
 
   const url = `${siteUrl}/artiklar/${article.slug}`;
+  const publishedIso = toIsoDateTimeUtc(article.date);
+  const modifiedIso = toIsoDateTimeUtc(article.dateModified ?? article.date);
   return {
     title: article.title,
     description: article.description,
@@ -32,25 +36,36 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url,
       type: "article",
       locale: "sv_SE",
-      publishedTime: article.date,
+      publishedTime: publishedIso,
+      modifiedTime: modifiedIso,
     },
     twitter: {
       card: "summary_large_image",
       title: article.title,
       description: article.description,
     },
-    alternates: { canonical: `/artiklar/${article.slug}` },
+    alternates: {
+      canonical: `/artiklar/${article.slug}`,
+      languages: hreflangLanguages(`/artiklar/${article.slug}`),
+    },
+    other: {
+      "article:published_time": publishedIso,
+      "article:modified_time": modifiedIso,
+      "og:updated_time": modifiedIso,
+    },
   };
 }
 
 function ArticleJsonLd({ article }: { article: Article }) {
   const pageUrl = `${siteUrl}/artiklar/${article.slug}`;
+  const modified = article.dateModified ?? article.date;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: article.title,
     description: article.description,
-    datePublished: article.date,
+    datePublished: toIsoDateTimeUtc(article.date),
+    dateModified: toIsoDateTimeUtc(modified),
     inLanguage: "sv-SE",
     url: pageUrl,
     author: {

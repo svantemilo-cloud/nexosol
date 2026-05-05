@@ -8,7 +8,10 @@ export type Article = {
   slug: string;
   title: string;
   description: string;
+  /** Publiceringsdatum (YYYY-MM-DD). */
   date: string;
+  /** Om artikeln ändrats efter publicering — annars används `date`. */
+  dateModified?: string;
   excerpt: string;
   category: string;
   body: ArticleBlock[];

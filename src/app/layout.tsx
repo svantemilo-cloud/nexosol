@@ -1,17 +1,32 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { ConditionalHeader } from "@/components/ConditionalHeader";
 import { articles } from "@/lib/articles";
+import {
+  newestArticleDate,
+  oldestArticleDate,
+  siteModifiedDate,
+  sitePublishedDate,
+  toIsoDateTimeUtc,
+} from "@/lib/site-dates";
+import { hreflangLanguages } from "@/lib/hreflang";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-sans",
+  preload: false,
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.nexosol.se";
 const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+
+const homePublishedIso = toIsoDateTimeUtc(sitePublishedDate());
+const homeModifiedIso = toIsoDateTimeUtc(siteModifiedDate());
+const kbOldestIso = toIsoDateTimeUtc(oldestArticleDate());
+const kbNewestIso = toIsoDateTimeUtc(newestArticleDate());
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -50,6 +65,7 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "/",
+    languages: hreflangLanguages("/"),
   },
   openGraph: {
     type: "website",
@@ -72,6 +88,9 @@ export const metadata: Metadata = {
     apple: [{ url: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
   },
   other: {
+    "article:published_time": homePublishedIso,
+    "article:modified_time": homeModifiedIso,
+    "og:updated_time": homeModifiedIso,
     "format-detection": "telephone=no",
     "apple-mobile-web-app-title": "Nexosol",
     "apple-mobile-web-app-capable": "yes",
@@ -114,6 +133,8 @@ const jsonLd = {
       name: "Nexosol",
       description:
         "Jämför & Spara med Nexosol – Din väg till grön el. Få upp till 4 offerter från kvalitetssäkrade installatörer.",
+      datePublished: homePublishedIso,
+      dateModified: homeModifiedIso,
       publisher: { "@id": `${siteUrl}/#organization` },
       inLanguage: "sv-SE",
       hasPart: [
@@ -134,6 +155,8 @@ const jsonLd = {
       "@id": `${siteUrl}/#webpage`,
       url: siteUrl,
       name: "Nexosol – Jämför & Spara med grön el",
+      datePublished: homePublishedIso,
+      dateModified: homeModifiedIso,
       isPartOf: { "@id": `${siteUrl}/#website` },
       about: { "@id": `${siteUrl}/#organization` },
       inLanguage: "sv-SE",
@@ -145,6 +168,8 @@ const jsonLd = {
       name: "Kunskapsbank – Guider om solceller och solel",
       description:
         "Guider om solceller: pris, storlek, lönsamhet, underhåll och tak. Nexosols kunskapsbank.",
+      datePublished: kbOldestIso,
+      dateModified: kbNewestIso,
       isPartOf: { "@id": `${siteUrl}/#website` },
       about: { "@id": `${siteUrl}/#organization` },
       inLanguage: "sv-SE",
@@ -164,7 +189,8 @@ const jsonLd = {
           url: `${siteUrl}/artiklar/${article.slug}`,
           name: article.title,
           description: article.description,
-          datePublished: article.date,
+          datePublished: toIsoDateTimeUtc(article.date),
+          dateModified: toIsoDateTimeUtc(article.dateModified ?? article.date),
         },
       })),
     },
@@ -179,26 +205,12 @@ export default function RootLayout({
   return (
     <html lang="sv" className={`scroll-smooth ${montserrat.variable}`}>
       <head>
-        {/* Om /_next/static/css inte laddas (blockering, nätverk) – undvik ren Times/UA-stil */}
+        <link rel="stylesheet" href="/nexosol-responsive.css" />
+        {/* Om /_next/static/css inte laddas – minimal fallback (Tailwind + next/font ligger i bundlad CSS). */}
         <style
           dangerouslySetInnerHTML={{
             __html: `:where(html){font-family:var(--font-sans),ui-sans-serif,system-ui,sans-serif}:where(body){margin:0;background:#f9fafb;color:#065a45}`,
           }}
-        />
-        {gtmId && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','${gtmId}');`,
-            }}
-          />
-        )}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body
@@ -218,6 +230,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         )}
         {children}
         <ConditionalHeader />
+        {/* GTM och JSON‑LD efter mål för mindre blocking i <head>. */}
+        {gtmId ? (
+          <Script id="google-tag-manager" strategy="afterInteractive">
+            {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${gtmId}');`}
+          </Script>
+        ) : null}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </body>
     </html>
   );

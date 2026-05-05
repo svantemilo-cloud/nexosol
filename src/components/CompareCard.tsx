@@ -1,11 +1,19 @@
 import Link from "next/link";
-import Image from "next/image";
+import { getImageProps } from "next/image";
 
 /**
  * Stor CTA-kort med gradientbakgrund, rubrik med accentfärg,
  * underrubrik, knapp och bild – "Jämför 4 offerter på 60 sekunder".
  */
 export function CompareCard() {
+  const { props: compareImg } = getImageProps({
+    src: "/compare-hero.png",
+    alt: "Installatör och kund i samtal framför hus med solceller på taket",
+    width: 1024,
+    height: 682,
+    sizes: "(max-width: 768px) 100vw, 40vw",
+  });
+
   return (
     <section className="px-3 sm:px-4 md:px-6 py-10 sm:py-12 scroll-mt-24">
       <div className="max-w-6xl mx-auto">
@@ -38,13 +46,11 @@ export function CompareCard() {
           {/* Höger kolumn: bild i rundad container */}
           <div className="relative w-full md:w-[40%] min-h-[280px] md:min-h-[360px] flex-shrink-0">
             <div className="absolute inset-4 md:inset-6 rounded-2xl overflow-hidden shadow-soft-lg">
-              <Image
-                src="/compare-hero.png"
-                alt="Installatör och kund i samtal framför hus med solceller på taket"
-                fill
-                className="object-cover object-center"
-                sizes="(max-width: 768px) 100vw, 40vw"
-                priority
+              <img
+                {...compareImg}
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover object-center"
               />
             </div>
           </div>

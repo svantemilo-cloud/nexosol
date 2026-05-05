@@ -207,7 +207,7 @@ export function Calculator() {
 
         <div className="nx-card">
           <div className="nx-card-header">
-            <div className="nx-card-title">Vad kostar solceller för dig?</div>
+            <h2 className="nx-card-title">Vad kostar solceller för dig?</h2>
             <div className="nx-card-sub">
               Jämför offerter enkelt, kostnadsfritt och bindningsfritt.
             </div>
@@ -238,10 +238,13 @@ export function Calculator() {
                 <div className={`nx-step ${currentStep === 1 ? "active" : ""}`}>
                   <div className="nx-slider-group">
                     <div className="nx-slider-row">
-                      <span className="nx-slider-name">Årsförbrukning</span>
+                      <label htmlFor="nx-consumption" className="nx-slider-name">
+                        Årsförbrukning
+                      </label>
                       <span className="nx-slider-val">{fmt(consumption)} kWh</span>
                     </div>
                     <input
+                      id="nx-consumption"
                       type="range"
                       className="nx-range"
                       min={2000}
@@ -249,15 +252,17 @@ export function Calculator() {
                       step={500}
                       value={consumption}
                       onChange={(e) => setConsumption(Number(e.target.value))}
-                      aria-label="Årsförbrukning"
                     />
                   </div>
                   <div className="nx-slider-group">
                     <div className="nx-slider-row">
-                      <span className="nx-slider-name">Takyta</span>
+                      <label htmlFor="nx-roof-area" className="nx-slider-name">
+                        Takyta
+                      </label>
                       <span className="nx-slider-val">{roofArea} m²</span>
                     </div>
                     <input
+                      id="nx-roof-area"
                       type="range"
                       className="nx-range"
                       min={20}
@@ -265,10 +270,9 @@ export function Calculator() {
                       step={5}
                       value={roofArea}
                       onChange={(e) => setRoofArea(Number(e.target.value))}
-                      aria-label="Takyta"
                     />
                   </div>
-                  <div className="nx-step-heading">Taktyp</div>
+                  <h3 className="nx-step-heading">Taktyp</h3>
                   {(
                     [
                       { key: "sadel" as const, icon: "🏠", label: "Sadeltak", sub: "Bäst soleffekt" },
@@ -296,7 +300,7 @@ export function Calculator() {
                 </div>
 
                 <div className={`nx-step ${currentStep === 2 ? "active" : ""}`}>
-                  <div className="nx-step-heading">Välj din region</div>
+                  <h3 className="nx-step-heading">Välj din region</h3>
                   {(
                     [
                       { key: "norra" as const, icon: "🌲", label: "Norra Sverige", sub: "800–900 kWh/kWp" },
@@ -366,7 +370,7 @@ export function Calculator() {
 
                   <div className="offert-locked-wrapper" role="button" tabIndex={0} onClick={focusEmail} onKeyDown={(e) => e.key === "Enter" && focusEmail()}>
                     <div className="offert-locked-content">
-                      <div className="offert-summary-title">Din offert</div>
+                      <h3 className="offert-summary-title">Din offert</h3>
                       <div className="offert-line">
                         <span>Förbrukning</span>
                         <span className="offert-line-val">{fmt(calc.c)} kWh/år</span>
@@ -499,7 +503,10 @@ export function Calculator() {
                     />
                   </div>
 
-                  <div className="nx-honeypot" aria-hidden="true">
+                  <div className="nx-honeypot">
+                    <label htmlFor="nx-hp" className="nx-honeypot-label">
+                      Lämna detta fält tomt
+                    </label>
                     <input
                       id="nx-hp"
                       tabIndex={-1}
@@ -558,15 +565,15 @@ export function Calculator() {
 
           <div className={`success-screen ${showSuccess ? "visible" : ""}`} id="successScreen">
             <div className="success-icon">🎉</div>
-            <div className="success-title">Din offert är upplåst!</div>
+            <h3 className="success-title">Din offert är upplåst!</h3>
             <div className="success-sub">
               Vi skickar din fullständiga offert till <strong>{email.trim()}</strong> inom 24 timmar.
               Certifierade installatörer nära dig kontaktar dig med konkreta priser.
             </div>
             <div className="success-summary">
-              <div className="offert-summary-title" style={{ marginBottom: 10 }}>
+              <h3 className="offert-summary-title" style={{ marginBottom: 10 }}>
                 Din offert
-              </div>
+              </h3>
               <div className="success-row">
                 <span>Besparing per år</span>
                 <span className="success-row-val">{fmt(calc.savings)} kr/år</span>

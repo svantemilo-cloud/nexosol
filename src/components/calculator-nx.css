@@ -5,6 +5,11 @@
   box-sizing: border-box;
 }
 
+.nx-calculator-root h2,
+.nx-calculator-root h3 {
+  margin-top: 0;
+}
+
 .nx-calculator-root {
   --nx-green: #1a4d35;
   --nx-green-light: #f0f7f3;
@@ -684,6 +689,18 @@
 }
 
 .nx-calculator-root .nx-honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.nx-calculator-root .nx-honeypot-label {
   position: absolute;
   width: 1px;
   height: 1px;

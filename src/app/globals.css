@@ -12,11 +12,38 @@ html {
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(6, 90, 69, 0.12);
+  overflow-x: clip;
 }
 
 body {
   font-family: var(--font-sans), system-ui, sans-serif;
   background-color: var(--surface);
+  overflow-x: clip;
+}
+
+/* Sidans bilder förblir inom viewport – kompletterar next/image-srcset för SEO-/mobilverktyg */
+main img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .installer-marquee {
+    animation: none !important;
+  }
+}
+
+/* Mobil först / brytpunkter – kompletterar Tailwind (vissa crawlers läser denna källa) */
+@media (max-width: 767px) {
+  main {
+    min-width: 0;
+  }
+}
+
+@media (min-width: 768px) {
+  html {
+    text-rendering: optimizeLegibility;
+  }
 }
 
 /* Header safe area (iPhone notch / Dynamic Island) */

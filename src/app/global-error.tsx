@@ -1,5 +1,9 @@
 "use client";
 
+/** Systemstack – undvik render‑blockande Google Fonts‑stylesheet i felgränsläge */
+const UI_SANS =
+  'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
 export default function GlobalError({
   error,
   reset,
@@ -9,16 +13,21 @@ export default function GlobalError({
 }) {
   return (
     <html lang="sv">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
-      </head>
-      <body style={{ margin: 0, fontFamily: "'Montserrat', system-ui, sans-serif", padding: "2rem", background: "#f9fafb", color: "#065a45" }}>
+      <head />
+      <body
+        style={{
+          margin: 0,
+          fontFamily: UI_SANS,
+          padding: "2rem",
+          background: "#f9fafb",
+          color: "#065a45",
+        }}
+      >
         <div style={{ maxWidth: "600px", margin: "0 auto" }}>
           <h1 style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>Något gick fel</h1>
           <p style={{ marginBottom: "1rem", color: "#374151" }}>{error.message || "Ett oväntat fel inträffade."}</p>
           <button
+            type="button"
             onClick={() => reset()}
             style={{
               padding: "0.5rem 1rem",

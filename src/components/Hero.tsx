@@ -1,5 +1,4 @@
-"use client";
-
+import { getImageProps } from "next/image";
 import { Sun, Check, ChevronRight, PanelTop, Battery } from "lucide-react";
 
 const bullets = [
@@ -30,14 +29,23 @@ const productOptions = [
 ];
 
 export function Hero() {
+  const { props: heroImg } = getImageProps({
+    src: "/hero-solar.png",
+    alt: "",
+    width: 1024,
+    height: 580,
+    priority: true,
+    sizes: "(max-width: 1280px) 100vw, 1280px",
+  });
+
   return (
     <section className="relative overflow-hidden max-md:mt-0 max-md:pt-[max(5.5rem,calc(3.5rem+env(safe-area-inset-top,0px)))] max-md:pb-14 md:-mt-16 md:min-h-screen md:pt-28 md:pb-24">
-      {/* Bakgrundsbild täcker hela första sektionen */}
+      {/* Bakgrundsbild täcker hela första sektionen – vanlig img + srcset (synlig för enkla SEO-crawlers) */}
       <div className="absolute inset-0 z-0" aria-hidden>
         <img
-          src="/hero-solar.png"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          {...heroImg}
+          className="absolute inset-0 h-full w-full object-cover object-center"
+          decoding="async"
           fetchPriority="high"
         />
         {/* Gradient från vänster så att text är läsbar */}
@@ -54,16 +62,18 @@ export function Hero() {
               <Sun className="w-4 h-4" />
               Bästa priser 2026
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-forest leading-tight mb-4">
-              Enklare energi,{" "}
-              <span className="bg-forest-light/30 text-forest px-1 rounded">
-                smartare val
-              </span>
-            </h1>
-            <p className="text-base sm:text-lg text-forest/80 mb-6 max-w-lg">
-              Hitta bästa pris och kvalité på solenergiprodukter från lokala
-              installatörer.
-            </p>
+            <div id="nx-speakable-hero">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-forest leading-tight mb-4">
+                Enklare energi,{" "}
+                <span className="bg-forest-light/30 text-forest px-1 rounded">
+                  smartare val
+                </span>
+              </h1>
+              <p className="text-base sm:text-lg text-forest/80 mb-6 max-w-lg">
+                Hitta bästa pris och kvalité på solenergiprodukter från lokala
+                installatörer.
+              </p>
+            </div>
             <ul className="space-y-3 text-forest/80 text-base sm:text-lg mb-8">
               {bullets.map((item, i) => (
                 <li key={i} className="flex items-center gap-3">

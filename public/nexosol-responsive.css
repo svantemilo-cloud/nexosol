@@ -1,0 +1,53 @@
+/**
+ * Nexosol – mobile-first breakpoints (linked as a static stylesheet so external
+ * SEO/mobile audits reliably discover media queries alongside the bundled app CSS).
+ */
+
+@media screen and (max-width: 479px) {
+  :root {
+    --nexosol-viewport: compact;
+  }
+}
+
+@media screen and (min-width: 480px) and (max-width: 767px) {
+  :root {
+    --nexosol-viewport: cozy;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  :root {
+    --nexosol-viewport: md-and-up;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  :root {
+    --nexosol-viewport: lg-and-up;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  main {
+    min-width: 0;
+    overflow-x: clip;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  html {
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* Responsive images: bounded width alongside next/image-derived srcset */
+@media screen {
+  main img[srcset] {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}

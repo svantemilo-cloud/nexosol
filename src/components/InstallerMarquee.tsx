@@ -1,9 +1,14 @@
 "use client";
 
+import Image from "next/image";
+
 /**
  * Långsamt scrollande rad med installatörslogotyper.
  * Logotyperna är utklippta från en gemensam bild och ligger i public/installers/.
  */
+/** Källfiler i public/installers/ är 256×279 px (utom ev. legacy). */
+const LOGO_SIZE = { width: 256, height: 279 } as const;
+
 const LOGOS = [
   { src: "/installers/nordsol.png", alt: "NordSol" },
   { src: "/installers/aura-solar.png", alt: "Aura Solar" },
@@ -28,12 +33,16 @@ export function InstallerMarquee() {
               {LOGOS.map((logo) => (
                 <div
                   key={`${copy}-${logo.src}`}
-                  className="h-16 w-36 sm:h-20 sm:w-44 rounded-xl bg-surface flex items-center justify-center shrink-0 p-2 box-border"
+                  className="flex h-16 w-36 sm:h-20 sm:w-44 shrink-0 items-center justify-center rounded-xl bg-surface p-2 box-border"
                 >
-                  <img
+                  <Image
                     src={logo.src}
                     alt={logo.alt}
-                    className="w-full h-full object-contain"
+                    width={LOGO_SIZE.width}
+                    height={LOGO_SIZE.height}
+                    loading="lazy"
+                    className="max-h-full max-w-full object-contain object-center"
+                    sizes="(max-width: 640px) 144px, 176px"
                   />
                 </div>
               ))}

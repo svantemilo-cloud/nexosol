@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { articles } from "@/lib/articles";
+import { hreflangLanguages } from "@/lib/hreflang";
+import { newestArticleDate, oldestArticleDate, toIsoDateTimeUtc } from "@/lib/site-dates";
 import { Sun, ArrowRight, Calendar } from "lucide-react";
 
 export async function generateMetadata({
@@ -12,16 +14,26 @@ export async function generateMetadata({
   const title = "Kunskapsbank – Guider om solceller och solel";
   const description =
     "Läs guider om solcellspriser, lönsamhet, underhåll och vilka tak som passar. Nexosols kunskapsbank hjälper dig ta rätt beslut om solceller.";
+  const publishedIso = toIsoDateTimeUtc(oldestArticleDate());
+  const modifiedIso = toIsoDateTimeUtc(newestArticleDate());
   return {
     title,
     description,
-    alternates: { canonical: "/artiklar" },
+    alternates: {
+      canonical: "/artiklar",
+      languages: hreflangLanguages("/artiklar"),
+    },
     ...(hasSearch ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title: "Kunskapsbank – Guider om solceller | Nexosol",
       description:
         "Guider om solceller: pris, storlek, lönsamhet, underhåll och tak. Läs och jämför sedan offerter från kvalitetssäkrade installatörer.",
       url: "/artiklar",
+    },
+    other: {
+      "article:published_time": publishedIso,
+      "article:modified_time": modifiedIso,
+      "og:updated_time": modifiedIso,
     },
   };
 }
