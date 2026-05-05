@@ -795,3 +795,84 @@
   background: #e0eee6;
   border-color: var(--nx-green-mid);
 }
+
+/* Belopp dolda tills användaren kommit förbi regionsteget */
+.nx-calculator-root .nx-amount-blur {
+  filter: blur(10px);
+  opacity: 0.62;
+  user-select: none;
+  pointer-events: none;
+  transition: filter 0.35s ease, opacity 0.35s ease;
+}
+
+.nx-calculator-root .offert-summary-box {
+  margin-top: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--nx-border);
+  border-radius: 14px;
+  background: var(--nx-green-light);
+}
+
+/* Steg: sök installatörer efter adress */
+.nx-calculator-root .nx-installer-search {
+  text-align: center;
+  padding: 1.25rem 0.5rem 1.5rem;
+}
+
+.nx-calculator-root .nx-installer-search-spinner {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 1rem;
+  border: 3px solid var(--nx-border);
+  border-top-color: var(--nx-green-mid);
+  border-radius: 50%;
+  animation: nx-spin 0.85s linear infinite;
+}
+
+@keyframes nx-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.nx-calculator-root .nx-installer-search-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--nx-green);
+}
+
+.nx-calculator-root .nx-installer-search-sub {
+  margin: 0 auto;
+  max-width: 22rem;
+  font-size: 13px;
+  color: var(--nx-gray);
+  line-height: 1.45;
+}
+
+.nx-calculator-root .nx-installer-search-hint {
+  margin: 1rem auto 0;
+  max-width: 18rem;
+  font-size: 11px;
+  color: var(--nx-gray);
+}
+
+.nx-calculator-root .nx-installer-cards-blur {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 1.35rem;
+  flex-wrap: wrap;
+  filter: blur(7px);
+  opacity: 0.55;
+  user-select: none;
+  pointer-events: none;
+}
+
+.nx-calculator-root .nx-installer-card-fake {
+  width: 72px;
+  height: 52px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #e5e9e6, #d1d8d3);
+  border: 1px solid var(--nx-border);
+}
