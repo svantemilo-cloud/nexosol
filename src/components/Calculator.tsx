@@ -828,20 +828,20 @@ export function Calculator({
                       ? "Gratis · Ingen bindning"
                       : "🔒 Dina uppgifter är säkra"}
                 </span>
-                {currentStep < TOTAL_STEPS && currentStep !== 3 ? (
+                {currentStep !== 3 && currentStep <= TOTAL_STEPS ? (
                   <button
                     type="button"
                     className="nx-nav-btn primary"
-                    onClick={currentStep === 6 ? submitLead : tryGoNext}
+                    onClick={currentStep === TOTAL_STEPS ? submitLead : tryGoNext}
                     disabled={
                       (currentStep === 1 && !solutionInterest) ||
                       (currentStep === 4 &&
                         !(isValidFullName(fullName) || (firstName.trim().length >= 2 && lastName.trim().length >= 2))) ||
                       (currentStep === 5 && !isValidEmail(email.trim())) ||
-                      (currentStep === 6 && (!isValidPhone(phone) || submitStatus === "sending"))
+                      (currentStep === TOTAL_STEPS && (!isValidPhone(phone) || submitStatus === "sending"))
                     }
                   >
-                    {currentStep === 6
+                    {currentStep === TOTAL_STEPS
                       ? submitStatus === "sending"
                         ? "Skickar…"
                         : "Få kostnadsfria offerter →"
