@@ -133,6 +133,8 @@ export function Calculator({
   const [addressSuggestions, setAddressSuggestions] = useState<string[]>([]);
   const [addressSuggestOpen, setAddressSuggestOpen] = useState(false);
   const [addressSuggestLoading, setAddressSuggestLoading] = useState(false);
+  // När användaren väljer ett förslag vill vi inte auto-öppna listan igen direkt via fetch-effekten.
+  const [addressSuggestLocked, setAddressSuggestLocked] = useState(false);
   const [installerFound, setInstallerFound] = useState(false);
   const [emailError, setEmailError] = useState(false);
   /** Honeypot — ska lämnas tom (undvik namn som "fax" pga webbläsarens autofill). */
@@ -210,7 +212,7 @@ export function Calculator({
             .filter(Boolean)
             .slice(0, 6);
           setAddressSuggestions(s);
-          setAddressSuggestOpen(true);
+          if (!addressSuggestLocked) setAddressSuggestOpen(true);
         })
         .catch(() => {
           if (cancelled) return;
@@ -225,7 +227,7 @@ export function Calculator({
       cancelled = true;
       window.clearTimeout(t);
     };
-  }, [address, currentStep]);
+  }, [address, currentStep, addressSuggestLocked]);
 
   const navigate = useCallback((dir: number) => {
     setCurrentStep((s) => Math.max(1, Math.min(TOTAL_STEPS, s + dir)));
@@ -517,11 +519,12 @@ export function Calculator({
                       placeholder="Exempelgatan 12, 123 45 Stad"
                       value={address}
                       onChange={(e) => {
+                        setAddressSuggestLocked(false);
                         setAddress(e.target.value);
                         setAddressError(false);
                       }}
                       onFocus={() => {
-                        if (addressSuggestions.length > 0) setAddressSuggestOpen(true);
+                        if (!addressSuggestLocked && addressSuggestions.length > 0) setAddressSuggestOpen(true);
                       }}
                       onBlur={() => {
                         window.setTimeout(() => setAddressSuggestOpen(false), 120);
@@ -536,6 +539,7 @@ export function Calculator({
                             className="nx-suggest-item"
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={() => {
+                              setAddressSuggestLocked(true);
                               setAddress(s);
                               setAddressSuggestOpen(false);
                               setAddressSuggestions([]);
