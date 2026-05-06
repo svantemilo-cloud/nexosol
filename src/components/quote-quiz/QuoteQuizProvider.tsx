@@ -41,10 +41,33 @@ function QuoteQuizModal({
   const titleId = useId();
 
   useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // Robust scroll lock for mobile Safari:
+    // - `overflow:hidden` alone doesn't always prevent background "rubber band" scroll
+    // - lock via fixed body, preserve scroll position, restore on close
+    const body = document.body;
+    const docEl = document.documentElement;
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+
+    const prevOverflow = body.style.overflow;
+    const prevPosition = body.style.position;
+    const prevTop = body.style.top;
+    const prevWidth = body.style.width;
+    const prevOverscroll = (docEl.style as any).overscrollBehaviorY as string | undefined;
+
+    body.style.overflow = "hidden";
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.width = "100%";
+    // Prevent scroll chaining on supported browsers.
+    (docEl.style as any).overscrollBehaviorY = "none";
+
     return () => {
-      document.body.style.overflow = prev;
+      body.style.overflow = prevOverflow;
+      body.style.position = prevPosition;
+      body.style.top = prevTop;
+      body.style.width = prevWidth;
+      (docEl.style as any).overscrollBehaviorY = prevOverscroll ?? "";
+      window.scrollTo(0, scrollY);
     };
   }, []);
 
