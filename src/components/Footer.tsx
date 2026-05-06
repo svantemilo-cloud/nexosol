@@ -22,7 +22,8 @@ const footerSections = [
     links: [
       { label: "Bli samarbetspartner", href: "#" },
       { label: "Kunskapsbank", href: "/artiklar" },
-      { label: "Integritetspolicy", href: "#" },
+      { label: "Integritetspolicy", href: "/integritetspolicy" },
+      { label: "Användarvillkor", href: "/anvandarvillkor" },
       { label: "Om oss", href: "#" },
     ],
   },
