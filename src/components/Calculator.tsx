@@ -1,17 +1,15 @@
 "use client";
 
-import { useMemo, useState, useCallback, useRef, useEffect } from "react";
+import { useMemo, useState, useCallback, useRef } from "react";
 import "./calculator-nx.css";
 
+type RoofKey = "sadel" | "platt" | "pulpet" | "mansard";
 type RegionKey = "norra" | "mellersta" | "sodra" | "skane";
 
 /** Intresse som styr offertval i CRM */
 export type SolutionKey = "solceller" | "batteri" | "kombination";
 
-/** Taktyp frågas inte — vi använder standarduppskattning (motsvarar sadeltak) i beräkning och CRM */
-const DEFAULT_ROOF_TYPE_API = "sadeltak";
-
-export const CALCULATOR_TOTAL_STEPS = 9;
+export const CALCULATOR_TOTAL_STEPS = 5;
 
 export type CalculatorProps = {
   variant?: "page" | "modal";
@@ -61,11 +59,25 @@ function solutionToLeadPayload(solution: SolutionKey) {
   }
 }
 
+const ROOF_M: Record<RoofKey, number> = {
+  sadel: 1.0,
+  platt: 0.95,
+  pulpet: 0.92,
+  mansard: 0.88,
+};
+
 const REG_M: Record<RegionKey, number> = {
   norra: 0.85,
   mellersta: 1.0,
   sodra: 1.1,
   skane: 1.2,
+};
+
+const ROOF_NAMES: Record<RoofKey, string> = {
+  sadel: "Sadeltak",
+  platt: "Platt tak",
+  pulpet: "Pulpettak",
+  mansard: "Mansardtak",
 };
 
 const REG_NAMES: Record<RegionKey, string> = {
@@ -74,6 +86,13 @@ const REG_NAMES: Record<RegionKey, string> = {
   sodra: "Södra Sverige",
   skane: "Skåne / Blekinge",
 };
+
+function roofKeyToApi(roof: RoofKey): string {
+  if (roof === "sadel") return "sadeltak";
+  if (roof === "platt") return "platt";
+  if (roof === "pulpet") return "pulpet";
+  return "sadeltak";
+}
 
 function regionKeyToApi(reg: RegionKey): string {
   if (reg === "norra") return "nord";
@@ -85,17 +104,7 @@ function fmt(n: number): string {
   return Math.round(n).toLocaleString("sv-SE");
 }
 
-function isValidEmail(raw: string): boolean {
-  const s = raw.trim();
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
-}
-
 const TOTAL_STEPS = CALCULATOR_TOTAL_STEPS;
-
-/** Steg där besparingar/priser visas tydligt (efter regionval) */
-const AMOUNTS_VISIBLE_FROM_STEP = 6;
-
-const INSTALLER_SEARCH_MS = 2400;
 
 export function Calculator({
   variant = "page",
@@ -109,6 +118,7 @@ export function Calculator({
   const [addressError, setAddressError] = useState(false);
   const [consumption, setConsumption] = useState(10000);
   const [roofArea, setRoofArea] = useState(50);
+  const [roofType, setRoofType] = useState<RoofKey>("sadel");
   const [region, setRegion] = useState<RegionKey>("mellersta");
 
   const [firstName, setFirstName] = useState("");
@@ -125,13 +135,12 @@ export function Calculator({
   const [submitErrorDetail, setSubmitErrorDetail] = useState<string | null>(null);
 
   const emailRef = useRef<HTMLInputElement>(null);
-  const phoneRef = useRef<HTMLInputElement>(null);
 
   const calc = useMemo(() => {
     const c = consumption;
     const r = roofArea;
     const kwp = Math.min(r * 0.15, c / 900);
-    const prod = kwp * 950 * (REG_M[region] ?? 1);
+    const prod = kwp * 950 * (ROOF_M[roofType] ?? 1) * (REG_M[region] ?? 1);
     const savings = Math.round((prod * 1.5) / 500) * 500;
     const installAfterROT = Math.round((kwp * 15000 * 0.7) / 5000) * 5000;
     const panels = Math.round(kwp / 0.4);
@@ -152,30 +161,11 @@ export function Calculator({
       profit25,
       co2,
     };
-  }, [consumption, roofArea, region]);
-
-  const amountsRevealed =
-    showSuccess || (!showSuccess && currentStep >= AMOUNTS_VISIBLE_FROM_STEP);
-
-  useEffect(() => {
-    if (currentStep !== 3) return;
-    const t = window.setTimeout(() => {
-      setCurrentStep(4);
-    }, INSTALLER_SEARCH_MS);
-    return () => window.clearTimeout(t);
-  }, [currentStep]);
+  }, [consumption, roofArea, roofType, region]);
 
   const navigate = useCallback((dir: number) => {
     setCurrentStep((s) => Math.max(1, Math.min(TOTAL_STEPS, s + dir)));
   }, []);
-
-  const goBack = useCallback(() => {
-    if (currentStep === 4) {
-      setCurrentStep(2);
-      return;
-    }
-    navigate(-1);
-  }, [currentStep, navigate]);
 
   const tryGoNext = useCallback(() => {
     if (currentStep === 1) {
@@ -189,20 +179,13 @@ export function Calculator({
       }
       setAddressError(false);
     }
-    if (currentStep === 3) {
-      return;
-    }
-    if (currentStep === 8) {
-      const em = email.trim();
-      if (!isValidEmail(em)) {
-        setEmailError(true);
-        emailRef.current?.focus();
-        return;
-      }
-      setEmailError(false);
-    }
     navigate(1);
-  }, [currentStep, solutionInterest, address, email, navigate]);
+  }, [currentStep, solutionInterest, address, navigate]);
+
+  const focusEmail = useCallback(() => {
+    emailRef.current?.focus();
+    emailRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, []);
 
   const submitLead = useCallback(async () => {
     const em = email.trim();
@@ -213,9 +196,8 @@ export function Calculator({
       return;
     }
     setAddressError(false);
-    if (!em || !isValidEmail(em)) {
+    if (!em) {
       setEmailError(true);
-      setCurrentStep(8);
       emailRef.current?.focus();
       return;
     }
@@ -233,7 +215,7 @@ export function Calculator({
       address: addr,
       consumptionKwh: calc.c,
       roofAreaM2: calc.r,
-      roofType: DEFAULT_ROOF_TYPE_API,
+      roofType: roofKeyToApi(roofType),
       region: regionKeyToApi(region),
       includeBattery: leadOpts.includeBattery,
       offertChoices: leadOpts.offertChoices,
@@ -275,18 +257,14 @@ export function Calculator({
     } catch {
       setSubmitStatus("error");
     }
-  }, [calc, firstName, lastName, email, phone, address, region, nxHp, solutionInterest]);
+  }, [calc, firstName, lastName, email, phone, address, roofType, region, nxHp, solutionInterest]);
 
   const stepLabels = [
-    "Steg 1 av 9 — Vilken lösning intresserar dig?",
-    "Steg 2 av 9 — Din adress",
-    "Steg 3 av 9 — Vi letar installatörer",
-    "Steg 4 av 9 — Förbrukning och takyta",
-    "Steg 5 av 9 — Din region",
-    "Steg 6 av 9 — Din uppskattade offert",
-    "Steg 7 av 9 — Ditt namn",
-    "Steg 8 av 9 — E-post",
-    "Steg 9 av 9 — Telefon",
+    "Steg 1 av 5 — Vilken lösning intresserar dig?",
+    "Steg 2 av 5 — Din adress",
+    "Steg 3 av 5 — Din förbrukning och tak",
+    "Steg 4 av 5 — Din plats & system",
+    "Steg 5 av 5 — Din gratis offert",
   ];
 
   const progressPct = showSuccess
@@ -350,14 +328,12 @@ export function Calculator({
             </div>
           </div>
           <div className="nx-savings-bar">
-            <div className={amountsRevealed ? undefined : "nx-amount-blur"}>
+            <div>
               <div className="nx-savings-label">Uppskattad besparing per år</div>
               <div className="nx-savings-amount">{fmt(calc.savings)} kr</div>
             </div>
-            <div className={amountsRevealed ? undefined : "nx-amount-blur"}>
-              <div className="nx-savings-badge">
-                +{fmt(calc.savings * 25)} kr / 25 år
-              </div>
+            <div className="nx-savings-badge">
+              +{fmt(calc.savings * 25)} kr / 25 år
             </div>
           </div>
 
@@ -367,7 +343,7 @@ export function Calculator({
                 <div
                   className={`nx-steps${variant === "modal" ? " nx-steps--modal-hide" : ""}`}
                 >
-                  {Array.from({ length: TOTAL_STEPS }, (_, idx) => idx + 1).map((i) => (
+                  {[1, 2, 3, 4, 5].map((i) => (
                     <div
                       key={i}
                       className={`nx-step-pip ${i < currentStep ? "done" : ""} ${i === currentStep ? "active" : ""}`}
@@ -451,29 +427,6 @@ export function Calculator({
                 </div>
 
                 <div className={`nx-step ${currentStep === 3 ? "active" : ""}`}>
-                  <div className="nx-installer-search" aria-live="polite">
-                    <div className="nx-installer-search-spinner" aria-hidden />
-                    <h3 className="nx-installer-search-title">Letar installatörer nära dig…</h3>
-                    <p className="nx-installer-search-sub">
-                      Vi matchar din adress med kvalitetssäkrade partners i området.
-                    </p>
-                    <div className="nx-installer-cards-blur" aria-hidden>
-                      <div className="nx-installer-card-fake" />
-                      <div className="nx-installer-card-fake" />
-                      <div className="nx-installer-card-fake" />
-                      <div className="nx-installer-card-fake" />
-                    </div>
-                    <p className="nx-installer-search-hint nx-amount-blur">
-                      Förhandsmatchning · uppskattat antal installatörer i din zon
-                    </p>
-                  </div>
-                </div>
-
-                <div className={`nx-step ${currentStep === 4 ? "active" : ""}`}>
-                  <h3 className="nx-step-heading">Ungefär hur mycket el förbrukar du?</h3>
-                  <p className="nx-card-sub text-left mb-4 !text-[13px] !leading-snug">
-                    Dra reglagen — du kan ändra senare. Takytan hjälper oss uppskatta hur stor anläggning som får plats.
-                  </p>
                   <div className="nx-slider-group">
                     <div className="nx-slider-row">
                       <label htmlFor="nx-consumption" className="nx-slider-name">
@@ -495,7 +448,7 @@ export function Calculator({
                   <div className="nx-slider-group">
                     <div className="nx-slider-row">
                       <label htmlFor="nx-roof-area" className="nx-slider-name">
-                        Tillgänglig takyta för paneler
+                        Takyta
                       </label>
                       <span className="nx-slider-val">{roofArea} m²</span>
                     </div>
@@ -510,9 +463,34 @@ export function Calculator({
                       onChange={(e) => setRoofArea(Number(e.target.value))}
                     />
                   </div>
+                  <h3 className="nx-step-heading">Taktyp</h3>
+                  {(
+                    [
+                      { key: "sadel" as const, icon: "🏠", label: "Sadeltak", sub: "Bäst soleffekt" },
+                      { key: "platt" as const, icon: "▬", label: "Platt tak", sub: "Flexibel vinkel" },
+                      { key: "pulpet" as const, icon: "📐", label: "Pulpettak", sub: "God effekt" },
+                      { key: "mansard" as const, icon: "🏰", label: "Mansardtak", sub: "Anpassad lösning" },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      className={`nx-option-row ${roofType === opt.key ? "selected" : ""}`}
+                      onClick={() => setRoofType(opt.key)}
+                    >
+                      <div className="nx-option-left">
+                        <div className="nx-option-icon">{opt.icon}</div>
+                        <div>
+                          <div className="nx-option-label">{opt.label}</div>
+                          <div className="nx-option-sub">{opt.sub}</div>
+                        </div>
+                      </div>
+                      <span className="nx-option-arrow">›</span>
+                    </button>
+                  ))}
                 </div>
 
-                <div className={`nx-step ${currentStep === 5 ? "active" : ""}`}>
+                <div className={`nx-step ${currentStep === 4 ? "active" : ""}`}>
                   <h3 className="nx-step-heading">Välj din region</h3>
                   {(
                     [
@@ -538,7 +516,7 @@ export function Calculator({
                       <span className="nx-option-arrow">›</span>
                     </button>
                   ))}
-                  <div className={`nx-stats${!amountsRevealed ? " nx-amount-blur" : ""}`}>
+                  <div className="nx-stats">
                     <div className="nx-stat">
                       <div className="nx-stat-val">{calc.kwp.toFixed(1)} kW</div>
                       <div className="nx-stat-label">Systemstorlek</div>
@@ -554,7 +532,7 @@ export function Calculator({
                   </div>
                 </div>
 
-                <div className={`nx-step ${currentStep === 6 ? "active" : ""}`}>
+                <div className={`nx-step ${currentStep === 5 ? "active" : ""}`}>
                   <div className="offert-hero">
                     <div className="offert-hero-tag">✦ Din personliga offert</div>
                     <div className="offert-hero-amount">{fmt(calc.savings)} kr</div>
@@ -581,55 +559,65 @@ export function Calculator({
                     </div>
                   </div>
 
-                  <div className="offert-summary-box">
-                    <h3 className="offert-summary-title">Sammanfattning</h3>
-                    {solutionInterest ? (
+                  <div className="offert-locked-wrapper" role="button" tabIndex={0} onClick={focusEmail} onKeyDown={(e) => e.key === "Enter" && focusEmail()}>
+                    <div className="offert-locked-content">
+                      <h3 className="offert-summary-title">Din offert</h3>
+                      {solutionInterest ? (
+                        <div className="offert-line">
+                          <span>Vald lösning</span>
+                          <span className="offert-line-val">{SOLUTION_LABELS[solutionInterest]}</span>
+                        </div>
+                      ) : null}
+                      {address.trim() ? (
+                        <div className="offert-line">
+                          <span>Adress</span>
+                          <span className="offert-line-val text-right max-w-[65%] truncate" title={address.trim()}>
+                            {address.trim()}
+                          </span>
+                        </div>
+                      ) : null}
                       <div className="offert-line">
-                        <span>Vald lösning</span>
-                        <span className="offert-line-val">{SOLUTION_LABELS[solutionInterest]}</span>
+                        <span>Förbrukning</span>
+                        <span className="offert-line-val">{fmt(calc.c)} kWh/år</span>
                       </div>
-                    ) : null}
-                    {address.trim() ? (
                       <div className="offert-line">
-                        <span>Adress</span>
-                        <span className="offert-line-val text-right max-w-[65%] truncate" title={address.trim()}>
-                          {address.trim()}
-                        </span>
+                        <span>Takyta</span>
+                        <span className="offert-line-val">{calc.r} m²</span>
                       </div>
-                    ) : null}
-                    <div className="offert-line">
-                      <span>Förbrukning</span>
-                      <span className="offert-line-val">{fmt(calc.c)} kWh/år</span>
+                      <div className="offert-line">
+                        <span>Taktyp</span>
+                        <span className="offert-line-val">{ROOF_NAMES[roofType]}</span>
+                      </div>
+                      <div className="offert-line">
+                        <span>Region</span>
+                        <span className="offert-line-val">{REG_NAMES[region]}</span>
+                      </div>
+                      <div className="offert-line">
+                        <span>Systemstorlek</span>
+                        <span className="offert-line-val">{calc.kwp.toFixed(1)} kWp</span>
+                      </div>
+                      <div className="offert-line">
+                        <span>Antal paneler</span>
+                        <span className="offert-line-val">{calc.panels} st</span>
+                      </div>
+                      <div className="offert-line">
+                        <span>Installationspris</span>
+                        <span className="offert-line-val">{fmt(calc.installAfterROT)} kr</span>
+                      </div>
+                      <div className="offert-line">
+                        <span>Återbetalningstid</span>
+                        <span className="offert-line-val">{calc.payback.toFixed(1)} år</span>
+                      </div>
                     </div>
-                    <div className="offert-line">
-                      <span>Takyta</span>
-                      <span className="offert-line-val">{calc.r} m²</span>
-                    </div>
-                    <div className="offert-line">
-                      <span>Region</span>
-                      <span className="offert-line-val">{REG_NAMES[region]}</span>
-                    </div>
-                    <div className="offert-line">
-                      <span>Systemstorlek</span>
-                      <span className="offert-line-val">{calc.kwp.toFixed(1)} kWp</span>
-                    </div>
-                    <div className="offert-line">
-                      <span>Antal paneler</span>
-                      <span className="offert-line-val">{calc.panels} st</span>
-                    </div>
-                    <div className="offert-line">
-                      <span>Installationspris</span>
-                      <span className="offert-line-val">{fmt(calc.installAfterROT)} kr</span>
-                    </div>
-                    <div className="offert-line">
-                      <span>Återbetalningstid</span>
-                      <span className="offert-line-val">{calc.payback.toFixed(1)} år</span>
+                    <div className="offert-lock-overlay">
+                      <div className="lock-icon">🔒</div>
+                      <div className="lock-label">Fyll i din e-post för att låsa upp</div>
+                      <div className="lock-sub">Din fullständiga offert väntar på dig — gratis</div>
                     </div>
                   </div>
 
                   <div className="urgency-strip">
-                    ⚡ Vi har matchat dig med installatörer nära din adress — nästa steg är dina
-                    kontaktuppgifter.
+                    ⚡ Just nu matchar 3 installatörer nära dig — lås din offert idag.
                   </div>
 
                   <div className="trust-row">
@@ -646,13 +634,8 @@ export function Calculator({
                       <span className="trust-check">✓</span> Certifierade installatörer
                     </div>
                   </div>
-                </div>
 
-                <div className={`nx-step ${currentStep === 7 ? "active" : ""}`}>
-                  <h3 className="nx-step-heading">Vad heter du?</h3>
-                  <p className="nx-card-sub text-left mb-4 !text-[13px] !leading-snug">
-                    Så installatörerna vet vem de ska kontakta med offerter.
-                  </p>
+                  <div className="form-section-label">Vart ska vi skicka din offert?</div>
                   <div className="nx-form-row">
                     <div className="nx-form-group">
                       <label className="nx-form-label" htmlFor="nx-fname">
@@ -662,7 +645,6 @@ export function Calculator({
                         id="nx-fname"
                         className="nx-input"
                         type="text"
-                        autoComplete="given-name"
                         placeholder="Anna"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
@@ -676,31 +658,21 @@ export function Calculator({
                         id="nx-lname"
                         className="nx-input"
                         type="text"
-                        autoComplete="family-name"
                         placeholder="Svensson"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                       />
                     </div>
                   </div>
-                </div>
-
-                <div className={`nx-step ${currentStep === 8 ? "active" : ""}`}>
-                  <h3 className="nx-step-heading">Var vill du få offerterna?</h3>
-                  <p className="nx-card-sub text-left mb-4 !text-[13px] !leading-snug">
-                    Vi skickar din sammanfattning och förslag hit. Vi delar inte din e-post med fler än de
-                    installatörer du matchas med.
-                  </p>
                   <div className="nx-form-group">
                     <label className="nx-form-label" htmlFor="nx-email">
-                      E-postadress
+                      E-post (krävs)
                     </label>
                     <input
                       ref={emailRef}
                       id="nx-email"
                       className={`nx-input ${emailError ? "nx-input-error" : ""}`}
                       type="email"
-                      autoComplete="email"
                       placeholder="anna@exempel.se"
                       value={email}
                       onChange={(e) => {
@@ -708,29 +680,16 @@ export function Calculator({
                         setEmailError(false);
                       }}
                     />
-                    {emailError ? (
-                      <p className="text-xs text-red-600 mt-1.5">Ange en giltig e-postadress.</p>
-                    ) : null}
                   </div>
-                </div>
-
-                <div className={`nx-step ${currentStep === 9 ? "active" : ""}`}>
-                  <h3 className="nx-step-heading">Vilket telefonnummer kan vi nå dig på?</h3>
-                  <p className="nx-card-sub text-left mb-4 !text-[13px] !leading-snug">
-                    Valfritt men hjälpsamt — många installatörer vill boka ett kort samtal för att ge ett mer
-                    träffsäkert pris.
-                  </p>
                   <div className="nx-form-group">
                     <label className="nx-form-label" htmlFor="nx-phone">
-                      Telefonnummer
+                      Telefon (valfritt)
                     </label>
                     <input
-                      ref={phoneRef}
                       id="nx-phone"
                       className="nx-input"
                       type="tel"
-                      autoComplete="tel"
-                      placeholder="070 123 45 67"
+                      placeholder="070 XXX XX XX"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                     />
@@ -749,7 +708,7 @@ export function Calculator({
                     />
                   </div>
 
-                  {submitStatus === "error" ? (
+                  {submitStatus === "error" && (
                     <p className="text-sm text-red-600 mb-2">
                       Något gick fel. Försök igen.
                       {submitErrorDetail ? (
@@ -758,14 +717,14 @@ export function Calculator({
                         </span>
                       ) : null}
                     </p>
-                  ) : null}
+                  )}
                   <button
                     type="button"
                     className="nx-cta"
                     onClick={submitLead}
                     disabled={submitStatus === "sending"}
                   >
-                    {submitStatus === "sending" ? "Skickar…" : "Skicka förfrågan — gratis ›"}
+                    {submitStatus === "sending" ? "Skickar…" : "Lås upp min offert — helt gratis ›"}
                   </button>
                   <div className="nx-cta-note">
                     🔒 Vi delar aldrig dina uppgifter med tredje part.
@@ -777,19 +736,17 @@ export function Calculator({
                 <button
                   type="button"
                   className="nx-nav-btn"
-                  onClick={goBack}
+                  onClick={() => navigate(-1)}
                   disabled={currentStep === 1}
                 >
                   ← Tillbaka
                 </button>
                 <span className="nx-footer-note">
-                  {currentStep === 3
-                    ? "Letar installatörer nära dig…"
-                    : currentStep < TOTAL_STEPS
-                      ? "Gratis · Ingen bindning"
-                      : "🔒 Dina uppgifter är säkra"}
+                  {currentStep < TOTAL_STEPS
+                    ? "Gratis · Ingen bindning · 60 sekunder"
+                    : "🔒 Dina uppgifter är säkra"}
                 </span>
-                {currentStep < TOTAL_STEPS && currentStep !== 3 ? (
+                {currentStep < TOTAL_STEPS && (
                   <button
                     type="button"
                     className="nx-nav-btn primary"
@@ -798,7 +755,7 @@ export function Calculator({
                   >
                     Nästa →
                   </button>
-                ) : null}
+                )}
               </div>
             </>
           )}
