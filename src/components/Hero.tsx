@@ -1,12 +1,12 @@
-import { Sun, Check } from "lucide-react";
+import { Sun, ShieldCheck, BadgePercent, Timer } from "lucide-react";
 import { ResponsivePicture } from "@/components/ResponsivePicture";
 import { HERO_PIC_WIDTHS } from "@/lib/image-variants";
 import { HeroQuoteCard } from "@/components/HeroQuoteCard";
 
-const bullets = [
-  "Endast trygga installatörer",
-  "Kostnadsfri prisförfrågan",
-  "Spar värdefull tid",
+const bullets: { text: string; Icon: typeof Sun }[] = [
+  { text: "Endast trygga installatörer", Icon: ShieldCheck },
+  { text: "Kostnadsfri prisförfrågan", Icon: BadgePercent },
+  { text: "Spar värdefull tid", Icon: Timer },
 ];
 
 export function Hero() {
@@ -47,22 +47,22 @@ export function Hero() {
                   smartare val
                 </span>
               </h1>
-              <p className="text-base sm:text-lg text-forest/80 mb-6 max-w-lg">
+              <p className="text-lg sm:text-xl text-forest/80 mb-6 max-w-lg">
                 Hitta bästa pris och kvalité på solenergiprodukter från lokala
                 installatörer.
               </p>
             </div>
-            <ul className="space-y-3 text-forest/80 text-base sm:text-lg mb-8">
-              {bullets.map((item, i) => (
+            <ul className="space-y-3 text-forest/80 text-lg sm:text-xl mb-8">
+              {bullets.map(({ text, Icon }, i) => (
                 <li key={i} className="flex items-center gap-3">
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-forest/10 flex items-center justify-center">
-                    <Check className="w-3.5 h-3.5 text-forest" strokeWidth={2.5} />
+                    <Icon className="w-3.5 h-3.5 text-forest" strokeWidth={2.25} />
                   </span>
-                  <span>{item}</span>
+                  <span>{text}</span>
                 </li>
               ))}
             </ul>
-            <p className="text-sm text-forest/60">
+            <p className="text-base sm:text-lg text-forest/60">
               Urval av våra installatörer – certifierade partners i hela Sverige.
             </p>
           </div>

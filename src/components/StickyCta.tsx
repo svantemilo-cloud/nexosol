@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, type MouseEvent } from "react";
-import { Menu, Sun, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useQuoteQuiz } from "@/components/quote-quiz/QuoteQuizProvider";
 
 const navLinks = [
@@ -46,11 +46,16 @@ export function StickyCta() {
         <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 flex md:hidden items-center h-14 gap-2">
           <Link
             href="/"
-            className="font-bold text-forest text-base sm:text-lg flex flex-1 min-w-0 items-center gap-2 py-2 rounded-xl hover:bg-forest/5 transition-colors"
+            className="flex flex-1 min-w-0 items-center gap-2 py-2 rounded-xl hover:bg-forest/5 transition-colors"
             onClick={() => setMenuOpen(false)}
           >
-            <Sun className="w-6 h-6 text-forest shrink-0" aria-hidden />
-            <span className="truncate">Nexosol</span>
+            <img
+              src="/nexosol-wordmark-transparent.png"
+              alt="Nexosol"
+              className="h-7 w-auto shrink-0"
+              loading="eager"
+              decoding="async"
+            />
           </Link>
           <Link
             href="/#calculator"
@@ -75,10 +80,15 @@ export function StickyCta() {
         <div className="hidden md:flex w-full max-w-7xl mx-auto pl-6 pr-6 items-center h-16 gap-8">
           <Link
             href="/"
-            className="font-bold text-forest text-2xl flex items-center gap-2 shrink-0 hover:text-forest-light transition-colors cursor-pointer mr-8"
+            className="flex items-center gap-2 shrink-0 hover:opacity-90 transition-opacity cursor-pointer mr-8"
           >
-            <Sun className="w-8 h-8 text-forest" />
-            Nexosol
+            <img
+              src="/nexosol-wordmark-transparent.png"
+              alt="Nexosol"
+              className="h-10 w-auto"
+              loading="eager"
+              decoding="async"
+            />
           </Link>
           <nav className="flex-1 flex items-center justify-between min-w-0 gap-4">
             {navLinks.map((item) =>

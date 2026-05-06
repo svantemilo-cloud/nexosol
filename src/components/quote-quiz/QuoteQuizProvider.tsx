@@ -69,7 +69,7 @@ function QuoteQuizModal({
         aria-label="Stäng formulär"
         onClick={onClose}
       />
-      <div className="relative z-10 flex max-h-[min(92dvh,920px)] w-full max-w-[540px] flex-col overflow-hidden rounded-t-3xl border border-forest/10 bg-[#f4f6f4] shadow-2xl sm:rounded-3xl">
+      <div className="relative z-10 flex max-h-[min(92dvh,920px)] w-full max-w-[640px] flex-col overflow-hidden rounded-t-3xl border border-forest/10 bg-[#f4f6f4] shadow-2xl sm:rounded-3xl md:max-w-[860px]">
         <div className="flex shrink-0 items-center justify-between border-b border-forest/10 bg-white/95 px-4 py-3 backdrop-blur-sm">
           <span id={titleId} className="text-lg font-bold text-forest">
             Nexosol

@@ -94,14 +94,14 @@ export function CookieBanner() {
             <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-start">
               <button
                 type="button"
-                className="rounded-xl border border-forest/20 bg-white/60 px-5 py-3 text-sm font-semibold text-forest hover:bg-white/80"
+                className="rounded-xl border border-forest/25 bg-white/70 px-5 py-3 text-sm font-semibold text-forest hover:bg-white/90 hover:border-forest/40"
                 onClick={() => setSettingsOpen(true)}
               >
                 Inställningar
               </button>
               <button
                 type="button"
-                className="rounded-xl bg-coral px-6 py-3 text-sm font-semibold text-white shadow-soft hover:opacity-95 active:scale-[0.99] transition-transform"
+                className="rounded-xl bg-forest px-6 py-3 text-sm font-semibold text-white shadow-soft hover:bg-forest-light active:scale-[0.99] transition-transform"
                 onClick={acceptAll}
               >
                 Acceptera alla
@@ -155,21 +155,21 @@ export function CookieBanner() {
             <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
               <button
                 type="button"
-                className="rounded-xl border border-forest/20 bg-white/60 px-5 py-3 text-sm font-semibold text-forest hover:bg-white/80"
+                className="rounded-xl border border-forest/25 bg-white/70 px-5 py-3 text-sm font-semibold text-forest hover:bg-white/90 hover:border-forest/40"
                 onClick={() => setSettingsOpen(false)}
               >
                 Tillbaka
               </button>
               <button
                 type="button"
-                className="rounded-xl border border-forest/20 bg-white/60 px-5 py-3 text-sm font-semibold text-forest hover:bg-white/80"
+                className="rounded-xl border border-forest/25 bg-white/70 px-5 py-3 text-sm font-semibold text-forest hover:bg-white/90 hover:border-forest/40"
                 onClick={acceptNecessaryOnly}
               >
                 Endast nödvändiga
               </button>
               <button
                 type="button"
-                className="rounded-xl bg-coral px-6 py-3 text-sm font-semibold text-white shadow-soft hover:opacity-95 active:scale-[0.99] transition-transform"
+                className="rounded-xl bg-forest px-6 py-3 text-sm font-semibold text-white shadow-soft hover:bg-forest-light active:scale-[0.99] transition-transform"
                 onClick={saveSelection}
               >
                 Spara val

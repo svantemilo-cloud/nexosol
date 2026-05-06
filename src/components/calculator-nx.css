@@ -409,7 +409,7 @@
 }
 
 .nx-calculator-root .nx-nav-btn:disabled {
-  opacity: 0.3;
+  opacity: 1;
   cursor: not-allowed;
 }
 
@@ -417,6 +417,12 @@
   background: var(--nx-green);
   color: white;
   border-color: var(--nx-green);
+}
+
+.nx-calculator-root .nx-nav-btn.primary:disabled {
+  background: #9ca3af;
+  border-color: #9ca3af;
+  color: #ffffff;
 }
 
 .nx-calculator-root .nx-nav-btn.primary:hover:not(:disabled) {
@@ -441,6 +447,83 @@
   font-weight: 500;
   color: #374151;
   margin-bottom: 8px;
+}
+
+.nx-calculator-root .nx-step-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+  margin: 0 0 1.1rem;
+}
+
+.nx-calculator-root .nx-step-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 0.5rem;
+}
+
+.nx-calculator-root .nx-step-question {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.nx-calculator-root .nx-step-info {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 24, 39, 0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(17, 24, 39, 0.6);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.nx-calculator-root .nx-step-info-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.nx-calculator-root .nx-privacy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 12px;
+  margin-top: 10px;
+  border-top: 1px solid var(--nx-border);
+}
+
+.nx-calculator-root .nx-privacy-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #374151;
+  margin-bottom: 2px;
+}
+
+.nx-calculator-root .nx-privacy-sub {
+  font-size: 12px;
+  color: var(--nx-gray);
+  line-height: 1.35;
+}
+
+.nx-calculator-root .nx-privacy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  color: var(--nx-green-mid);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.nx-calculator-root .nx-privacy-badge-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .nx-calculator-root .offert-hero {
@@ -796,6 +879,40 @@
   border-color: var(--nx-green-mid);
 }
 
+/* Adressförslag */
+.nx-calculator-root .nx-form-group {
+  position: relative;
+}
+
+.nx-calculator-root .nx-suggest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  background: #fff;
+  border: 1px solid var(--nx-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+}
+
+.nx-calculator-root .nx-suggest-item {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  font-family: var(--nx-font);
+  font-size: 13px;
+  color: #0f172a;
+  background: #fff;
+  border: 0;
+  cursor: pointer;
+}
+
+.nx-calculator-root .nx-suggest-item:hover {
+  background: var(--nx-green-light);
+}
+
 /* Belopp dolda tills användaren kommit förbi regionsteget */
 .nx-calculator-root .nx-amount-blur {
   filter: blur(10px);
@@ -827,6 +944,13 @@
   border-top-color: var(--nx-green-mid);
   border-radius: 50%;
   animation: nx-spin 0.85s linear infinite;
+}
+
+.nx-calculator-root .nx-installer-search-check {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 1rem;
+  color: var(--nx-green-mid);
 }
 
 @keyframes nx-spin {
@@ -875,4 +999,50 @@
   border-radius: 10px;
   background: linear-gradient(135deg, #e5e9e6, #d1d8d3);
   border: 1px solid var(--nx-border);
+}
+
+/* Steg: "hittade installatörer" + namn (som HemSol) */
+.nx-calculator-root .nx-found-wrap {
+  text-align: center;
+  margin: 0.25rem 0 1rem;
+}
+
+.nx-calculator-root .nx-found-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+  margin: 0 auto 0.6rem;
+  max-width: 34rem;
+}
+
+.nx-calculator-root .nx-found-check {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.9rem;
+}
+
+.nx-calculator-root .nx-found-check-icon {
+  width: 34px;
+  height: 34px;
+  color: var(--nx-green-mid);
+}
+
+.nx-calculator-root .nx-found-cards {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0 auto 0.75rem;
+  opacity: 0.9;
+  filter: blur(3px);
+  user-select: none;
+  pointer-events: none;
+}
+
+.nx-calculator-root .nx-helptext {
+  margin: 0.55rem 0 0;
+  font-size: 12px;
+  color: var(--nx-gray);
+  line-height: 1.35;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
+import { ShieldCheck, BadgePercent, Clock, Award, CheckCircle2, Info, Lock } from "lucide-react";
 import "./calculator-nx.css";
 
 type RegionKey = "norra" | "mellersta" | "sodra" | "skane";
@@ -11,7 +12,7 @@ export type SolutionKey = "solceller" | "batteri" | "kombination";
 /** Taktyp frågas inte — vi använder standarduppskattning (motsvarar sadeltak) i beräkning och CRM */
 const DEFAULT_ROOF_TYPE_API = "sadeltak";
 
-export const CALCULATOR_TOTAL_STEPS = 9;
+export const CALCULATOR_TOTAL_STEPS = 6;
 
 export type CalculatorProps = {
   variant?: "page" | "modal";
@@ -90,19 +91,31 @@ function isValidEmail(raw: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 }
 
+function isValidPhone(raw: string): boolean {
+  const digits = raw.replace(/[^\d]/g, "");
+  return digits.length >= 7;
+}
+
+function isValidFullName(raw: string): boolean {
+  const s = raw.trim().replace(/\s+/g, " ");
+  // tillåt enkla namn men kräver minst 2 tecken totalt
+  return s.length >= 2;
+}
+
 const TOTAL_STEPS = CALCULATOR_TOTAL_STEPS;
 
-/** Steg där besparingar/priser visas tydligt (efter regionval) */
-const AMOUNTS_VISIBLE_FROM_STEP = 6;
+/** Steg där besparingar/priser visas tydligt (när lead är skickad) */
+const AMOUNTS_VISIBLE_FROM_STEP = 99;
 
-const INSTALLER_SEARCH_MS = 2400;
+const INSTALLER_SEARCH_MS = 3400;
+const INSTALLER_FOUND_AT_MS = 1700;
 
 export function Calculator({
   variant = "page",
   onRequestClose,
   initialSolution = null,
 }: CalculatorProps) {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(() => (initialSolution ? 2 : 1));
   const [solutionInterest, setSolutionInterest] = useState<SolutionKey | null>(
     initialSolution ?? null,
   );
@@ -113,9 +126,14 @@ export function Calculator({
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [addressSuggestions, setAddressSuggestions] = useState<string[]>([]);
+  const [addressSuggestOpen, setAddressSuggestOpen] = useState(false);
+  const [addressSuggestLoading, setAddressSuggestLoading] = useState(false);
+  const [installerFound, setInstallerFound] = useState(false);
   const [emailError, setEmailError] = useState(false);
   /** Honeypot — ska lämnas tom (undvik namn som "fax" pga webbläsarens autofill). */
   const [nxHp, setNxHp] = useState("");
@@ -159,11 +177,55 @@ export function Calculator({
 
   useEffect(() => {
     if (currentStep !== 3) return;
-    const t = window.setTimeout(() => {
+    setInstallerFound(false);
+    const tFound = window.setTimeout(() => {
+      setInstallerFound(true);
+    }, INSTALLER_FOUND_AT_MS);
+    const tNext = window.setTimeout(() => {
       setCurrentStep(4);
     }, INSTALLER_SEARCH_MS);
-    return () => window.clearTimeout(t);
+    return () => {
+      window.clearTimeout(tFound);
+      window.clearTimeout(tNext);
+    };
   }, [currentStep]);
+
+  useEffect(() => {
+    if (currentStep !== 2) return;
+    const q = address.trim();
+    if (q.length < 3) {
+      setAddressSuggestions([]);
+      setAddressSuggestLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setAddressSuggestLoading(true);
+    const t = window.setTimeout(() => {
+      fetch(`/api/address-suggest?q=${encodeURIComponent(q)}`)
+        .then((r) => r.json() as Promise<{ suggestions?: { label?: string }[] }>)
+        .then((json) => {
+          if (cancelled) return;
+          const s = (json.suggestions ?? [])
+            .map((x) => (typeof x.label === "string" ? x.label : ""))
+            .filter(Boolean)
+            .slice(0, 6);
+          setAddressSuggestions(s);
+          setAddressSuggestOpen(true);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setAddressSuggestions([]);
+        })
+        .finally(() => {
+          if (cancelled) return;
+          setAddressSuggestLoading(false);
+        });
+    }, 180);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [address, currentStep]);
 
   const navigate = useCallback((dir: number) => {
     setCurrentStep((s) => Math.max(1, Math.min(TOTAL_STEPS, s + dir)));
@@ -178,6 +240,9 @@ export function Calculator({
   }, [currentStep, navigate]);
 
   const tryGoNext = useCallback(() => {
+    const nameOk =
+      isValidFullName(fullName) || (firstName.trim().length >= 2 && lastName.trim().length >= 2);
+
     if (currentStep === 1) {
       if (!solutionInterest) return;
     }
@@ -192,7 +257,10 @@ export function Calculator({
     if (currentStep === 3) {
       return;
     }
-    if (currentStep === 8) {
+    if (currentStep === 4) {
+      if (!nameOk) return;
+    }
+    if (currentStep === 5) {
       const em = email.trim();
       if (!isValidEmail(em)) {
         setEmailError(true);
@@ -201,8 +269,14 @@ export function Calculator({
       }
       setEmailError(false);
     }
+    if (currentStep === 6) {
+      if (!isValidPhone(phone)) {
+        phoneRef.current?.focus();
+        return;
+      }
+    }
     navigate(1);
-  }, [currentStep, solutionInterest, address, email, navigate]);
+  }, [currentStep, solutionInterest, address, email, phone, fullName, firstName, lastName, navigate]);
 
   const submitLead = useCallback(async () => {
     const em = email.trim();
@@ -215,7 +289,7 @@ export function Calculator({
     setAddressError(false);
     if (!em || !isValidEmail(em)) {
       setEmailError(true);
-      setCurrentStep(8);
+      setCurrentStep(5);
       emailRef.current?.focus();
       return;
     }
@@ -223,11 +297,19 @@ export function Calculator({
     setSubmitStatus("sending");
     setSubmitErrorDetail(null);
 
+    const resolvedName = fullName.trim();
+    const resolvedFirst =
+      firstName.trim() ||
+      (resolvedName ? resolvedName.split(/\s+/).slice(0, 1).join(" ") : "");
+    const resolvedLast =
+      lastName.trim() ||
+      (resolvedName ? resolvedName.split(/\s+/).slice(1).join(" ") : "");
+
     const sol = solutionInterest ?? "solceller";
     const leadOpts = solutionToLeadPayload(sol);
     const payload = {
-      firstName: firstName.trim() || undefined,
-      lastName: lastName.trim() || undefined,
+      firstName: resolvedFirst || undefined,
+      lastName: resolvedLast || undefined,
       email: em,
       phone: phone.trim() || undefined,
       address: addr,
@@ -275,18 +357,15 @@ export function Calculator({
     } catch {
       setSubmitStatus("error");
     }
-  }, [calc, firstName, lastName, email, phone, address, region, nxHp, solutionInterest]);
+  }, [calc, firstName, lastName, fullName, email, phone, address, region, nxHp, solutionInterest]);
 
   const stepLabels = [
-    "Steg 1 av 9 — Vilken lösning intresserar dig?",
-    "Steg 2 av 9 — Din adress",
-    "Steg 3 av 9 — Vi letar installatörer",
-    "Steg 4 av 9 — Förbrukning och takyta",
-    "Steg 5 av 9 — Din region",
-    "Steg 6 av 9 — Din uppskattade offert",
-    "Steg 7 av 9 — Ditt namn",
-    "Steg 8 av 9 — E-post",
-    "Steg 9 av 9 — Telefon",
+    "Steg 1 av 6 — Vilken lösning intresserar dig?",
+    "Steg 2 av 6 — Din adress",
+    "Steg 3 av 6 — Vi letar installatörer",
+    "Steg 4 av 6 — Ditt namn",
+    "Steg 5 av 6 — E-post",
+    "Steg 6 av 6 — Telefon",
   ];
 
   const progressPct = showSuccess
@@ -441,7 +520,35 @@ export function Calculator({
                         setAddress(e.target.value);
                         setAddressError(false);
                       }}
+                      onFocus={() => {
+                        if (addressSuggestions.length > 0) setAddressSuggestOpen(true);
+                      }}
+                      onBlur={() => {
+                        window.setTimeout(() => setAddressSuggestOpen(false), 120);
+                      }}
                     />
+                    {addressSuggestOpen && addressSuggestions.length > 0 ? (
+                      <div className="nx-suggest" role="listbox" aria-label="Adressförslag">
+                        {addressSuggestions.map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            className="nx-suggest-item"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => {
+                              setAddress(s);
+                              setAddressSuggestOpen(false);
+                              setAddressSuggestions([]);
+                            }}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                    {addressSuggestLoading ? (
+                      <p className="text-xs text-forest/70 mt-1.5">Söker adresser…</p>
+                    ) : null}
                     {addressError ? (
                       <p className="text-xs text-red-600 mt-1.5">
                         Fyll i en fullständig adress för att gå vidare.
@@ -452,24 +559,38 @@ export function Calculator({
 
                 <div className={`nx-step ${currentStep === 3 ? "active" : ""}`}>
                   <div className="nx-installer-search" aria-live="polite">
-                    <div className="nx-installer-search-spinner" aria-hidden />
-                    <h3 className="nx-installer-search-title">Letar installatörer nära dig…</h3>
-                    <p className="nx-installer-search-sub">
-                      Vi matchar din adress med kvalitetssäkrade partners i området.
-                    </p>
-                    <div className="nx-installer-cards-blur" aria-hidden>
-                      <div className="nx-installer-card-fake" />
-                      <div className="nx-installer-card-fake" />
-                      <div className="nx-installer-card-fake" />
-                      <div className="nx-installer-card-fake" />
-                    </div>
-                    <p className="nx-installer-search-hint nx-amount-blur">
-                      Förhandsmatchning · uppskattat antal installatörer i din zon
-                    </p>
+                    {installerFound ? (
+                      <CheckCircle2 className="nx-installer-search-check" aria-hidden />
+                    ) : (
+                      <div className="nx-installer-search-spinner" aria-hidden />
+                    )}
+                    <h3 className="nx-installer-search-title">
+                      {installerFound
+                        ? "4+ installatörer hittade i ditt närområde"
+                        : "Letar installatörer nära dig…"}
+                    </h3>
+                    {!installerFound ? (
+                      <p className="nx-installer-search-sub">
+                        Vi matchar din adress med kvalitetssäkrade partners i området.
+                      </p>
+                    ) : null}
+                    {!installerFound ? (
+                      <>
+                        <div className="nx-installer-cards-blur" aria-hidden>
+                          <div className="nx-installer-card-fake" />
+                          <div className="nx-installer-card-fake" />
+                          <div className="nx-installer-card-fake" />
+                          <div className="nx-installer-card-fake" />
+                        </div>
+                        <p className="nx-installer-search-hint nx-amount-blur">
+                          Förhandsmatchning · uppskattat antal installatörer i din zon
+                        </p>
+                      </>
+                    ) : null}
                   </div>
                 </div>
 
-                <div className={`nx-step ${currentStep === 4 ? "active" : ""}`}>
+                <div className={`nx-step ${currentStep === 7 ? "active" : ""}`}>
                   <h3 className="nx-step-heading">Ungefär hur mycket el förbrukar du?</h3>
                   <p className="nx-card-sub text-left mb-4 !text-[13px] !leading-snug">
                     Dra reglagen — du kan ändra senare. Takytan hjälper oss uppskatta hur stor anläggning som får plats.
@@ -512,7 +633,7 @@ export function Calculator({
                   </div>
                 </div>
 
-                <div className={`nx-step ${currentStep === 5 ? "active" : ""}`}>
+                <div className={`nx-step ${currentStep === 8 ? "active" : ""}`}>
                   <h3 className="nx-step-heading">Välj din region</h3>
                   {(
                     [
@@ -554,186 +675,113 @@ export function Calculator({
                   </div>
                 </div>
 
-                <div className={`nx-step ${currentStep === 6 ? "active" : ""}`}>
-                  <div className="offert-hero">
-                    <div className="offert-hero-tag">✦ Din personliga offert</div>
-                    <div className="offert-hero-amount">{fmt(calc.savings)} kr</div>
-                    <div className="offert-hero-label">
-                      beräknad besparing per år — baserat på dina uppgifter
+                {/* Offert-steget är borttaget: efter telefon är du klar och vi skickar direkt. */}
+                <div className={`nx-step ${currentStep === 4 ? "active" : ""}`}>
+                  <div className="nx-found-wrap">
+                    <div className="nx-found-title">Vi har hittat flera topprankade installatörer i ditt område</div>
+                    <div className="nx-found-check" aria-hidden>
+                      <CheckCircle2 className="nx-found-check-icon" />
                     </div>
-                    <div className="offert-hero-rows">
-                      <div className="offert-mini">
-                        <div className="offert-mini-val">{fmt(calc.installAfterROT)} kr</div>
-                        <div className="offert-mini-label">Systemkostnad efter ROT</div>
-                      </div>
-                      <div className="offert-mini">
-                        <div className="offert-mini-val">{calc.payback.toFixed(1)} år</div>
-                        <div className="offert-mini-label">Återbetalningstid</div>
-                      </div>
-                      <div className="offert-mini">
-                        <div className="offert-mini-val">{fmt(calc.profit25)} kr</div>
-                        <div className="offert-mini-label">Vinst över 25 år</div>
-                      </div>
-                      <div className="offert-mini">
-                        <div className="offert-mini-val">{calc.co2} ton</div>
-                        <div className="offert-mini-label">CO₂-besparing/år</div>
-                      </div>
+                    <div className="nx-found-cards" aria-hidden>
+                      <div className="nx-installer-card-fake" />
+                      <div className="nx-installer-card-fake" />
+                      <div className="nx-installer-card-fake" />
+                      <div className="nx-installer-card-fake" />
                     </div>
                   </div>
 
-                  <div className="offert-summary-box">
-                    <h3 className="offert-summary-title">Sammanfattning</h3>
-                    {solutionInterest ? (
-                      <div className="offert-line">
-                        <span>Vald lösning</span>
-                        <span className="offert-line-val">{SOLUTION_LABELS[solutionInterest]}</span>
-                      </div>
-                    ) : null}
-                    {address.trim() ? (
-                      <div className="offert-line">
-                        <span>Adress</span>
-                        <span className="offert-line-val text-right max-w-[65%] truncate" title={address.trim()}>
-                          {address.trim()}
-                        </span>
-                      </div>
-                    ) : null}
-                    <div className="offert-line">
-                      <span>Förbrukning</span>
-                      <span className="offert-line-val">{fmt(calc.c)} kWh/år</span>
-                    </div>
-                    <div className="offert-line">
-                      <span>Takyta</span>
-                      <span className="offert-line-val">{calc.r} m²</span>
-                    </div>
-                    <div className="offert-line">
-                      <span>Region</span>
-                      <span className="offert-line-val">{REG_NAMES[region]}</span>
-                    </div>
-                    <div className="offert-line">
-                      <span>Systemstorlek</span>
-                      <span className="offert-line-val">{calc.kwp.toFixed(1)} kWp</span>
-                    </div>
-                    <div className="offert-line">
-                      <span>Antal paneler</span>
-                      <span className="offert-line-val">{calc.panels} st</span>
-                    </div>
-                    <div className="offert-line">
-                      <span>Installationspris</span>
-                      <span className="offert-line-val">{fmt(calc.installAfterROT)} kr</span>
-                    </div>
-                    <div className="offert-line">
-                      <span>Återbetalningstid</span>
-                      <span className="offert-line-val">{calc.payback.toFixed(1)} år</span>
-                    </div>
-                  </div>
-
-                  <div className="urgency-strip">
-                    ⚡ Vi har matchat dig med installatörer nära din adress — nästa steg är dina
-                    kontaktuppgifter.
-                  </div>
-
-                  <div className="trust-row">
-                    <div className="trust-item">
-                      <span className="trust-check">✓</span> Kostnadsfritt
-                    </div>
-                    <div className="trust-item">
-                      <span className="trust-check">✓</span> Ingen bindning
-                    </div>
-                    <div className="trust-item">
-                      <span className="trust-check">✓</span> Svar inom 24h
-                    </div>
-                    <div className="trust-item">
-                      <span className="trust-check">✓</span> Certifierade installatörer
-                    </div>
-                  </div>
-                </div>
-
-                <div className={`nx-step ${currentStep === 7 ? "active" : ""}`}>
-                  <h3 className="nx-step-heading">Vad heter du?</h3>
-                  <p className="nx-card-sub text-left mb-4 !text-[13px] !leading-snug">
-                    Så installatörerna vet vem de ska kontakta med offerter.
-                  </p>
-                  <div className="nx-form-row">
-                    <div className="nx-form-group">
-                      <label className="nx-form-label" htmlFor="nx-fname">
-                        Förnamn
-                      </label>
-                      <input
-                        id="nx-fname"
-                        className="nx-input"
-                        type="text"
-                        autoComplete="given-name"
-                        placeholder="Anna"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                      />
-                    </div>
-                    <div className="nx-form-group">
-                      <label className="nx-form-label" htmlFor="nx-lname">
-                        Efternamn
-                      </label>
-                      <input
-                        id="nx-lname"
-                        className="nx-input"
-                        type="text"
-                        autoComplete="family-name"
-                        placeholder="Svensson"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className={`nx-step ${currentStep === 8 ? "active" : ""}`}>
-                  <h3 className="nx-step-heading">Var vill du få offerterna?</h3>
-                  <p className="nx-card-sub text-left mb-4 !text-[13px] !leading-snug">
-                    Vi skickar din sammanfattning och förslag hit. Vi delar inte din e-post med fler än de
-                    installatörer du matchas med.
-                  </p>
+                  <h3 className="nx-step-heading">Vad är ditt för- och efternamn?</h3>
                   <div className="nx-form-group">
-                    <label className="nx-form-label" htmlFor="nx-email">
-                      E-postadress
+                    <label className="nx-form-label" htmlFor="nx-fullname">
+                      För- och efternamn
                     </label>
+                    <input
+                      id="nx-fullname"
+                      className="nx-input"
+                      type="text"
+                      autoComplete="name"
+                      placeholder="För- och efternamn"
+                      value={fullName}
+                      onChange={(e) => {
+                        setFullName(e.target.value);
+                        // håll gamla fält i sync för admin/CRM, men låt submitLead avgöra slutgiltigt
+                        const raw = e.target.value.trim();
+                        const parts = raw ? raw.split(/\s+/) : [];
+                        setFirstName(parts.slice(0, 1).join(" "));
+                        setLastName(parts.slice(1).join(" "));
+                      }}
+                    />
+                    <p className="nx-helptext">
+                      Vi behöver ditt namn för att veta vem i hushållet som vill jämföra offerterna.
+                    </p>
+                  </div>
+                </div>
+
+                <div className={`nx-step ${currentStep === 5 ? "active" : ""}`}>
+                  <div className="nx-step-title">E-postadress</div>
+                  <div className="nx-step-row">
+                    <div className="nx-step-question">Var vill du få dina offerter skickade?</div>
+                    <span className="nx-step-info" aria-hidden>
+                      <Info className="nx-step-info-icon" />
+                    </span>
+                  </div>
+                  <div className="nx-form-group">
                     <input
                       ref={emailRef}
                       id="nx-email"
                       className={`nx-input ${emailError ? "nx-input-error" : ""}`}
                       type="email"
                       autoComplete="email"
-                      placeholder="anna@exempel.se"
+                      placeholder="din@email.se"
                       value={email}
                       onChange={(e) => {
                         setEmail(e.target.value);
                         setEmailError(false);
                       }}
                     />
-                    {emailError ? (
-                      <p className="text-xs text-red-600 mt-1.5">Ange en giltig e-postadress.</p>
-                    ) : null}
+                    <p className="nx-helptext">
+                      Vi delar aldrig din e-post med fler än de installatörer du matchas med.
+                    </p>
+                    {emailError ? <p className="text-xs text-red-600 mt-1.5">Ange en giltig e-postadress.</p> : null}
                   </div>
                 </div>
 
-                <div className={`nx-step ${currentStep === 9 ? "active" : ""}`}>
-                  <h3 className="nx-step-heading">Vilket telefonnummer kan vi nå dig på?</h3>
-                  <p className="nx-card-sub text-left mb-4 !text-[13px] !leading-snug">
-                    Valfritt men hjälpsamt — många installatörer vill boka ett kort samtal för att ge ett mer
-                    träffsäkert pris.
-                  </p>
+                <div className={`nx-step ${currentStep === 6 ? "active" : ""}`}>
+                  <div className="nx-step-title">En sista sak innan du får dina prispressade offerter!</div>
+                  <div className="nx-step-row">
+                    <div className="nx-step-question">Vad är ditt telefonnummer?</div>
+                    <span className="nx-step-info" aria-hidden>
+                      <Info className="nx-step-info-icon" />
+                    </span>
+                  </div>
                   <div className="nx-form-group">
-                    <label className="nx-form-label" htmlFor="nx-phone">
-                      Telefonnummer
-                    </label>
                     <input
                       ref={phoneRef}
                       id="nx-phone"
                       className="nx-input"
                       type="tel"
                       autoComplete="tel"
-                      placeholder="070 123 45 67"
+                      placeholder="073 123 45 67"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                     />
+                    <p className="nx-helptext">
+                      Telefonnummer behövs så installatörerna kan nå dig för offerering och eventuell
+                      uppgiftsinhämtning.
+                    </p>
+                  </div>
+
+                  <div className="nx-privacy">
+                    <div>
+                      <div className="nx-privacy-title">Vi värnar om din integritet</div>
+                      <div className="nx-privacy-sub">
+                        Genom att gå vidare godkänner du våra användar- och integritetsvillkor.
+                      </div>
+                    </div>
+                    <div className="nx-privacy-badge" aria-hidden>
+                      <Lock className="nx-privacy-badge-icon" />
+                      Tryggt och säkert
+                    </div>
                   </div>
 
                   <div className="nx-honeypot">
@@ -759,17 +807,6 @@ export function Calculator({
                       ) : null}
                     </p>
                   ) : null}
-                  <button
-                    type="button"
-                    className="nx-cta"
-                    onClick={submitLead}
-                    disabled={submitStatus === "sending"}
-                  >
-                    {submitStatus === "sending" ? "Skickar…" : "Skicka förfrågan — gratis ›"}
-                  </button>
-                  <div className="nx-cta-note">
-                    🔒 Vi delar aldrig dina uppgifter med tredje part.
-                  </div>
                 </div>
               </div>
 
@@ -784,7 +821,9 @@ export function Calculator({
                 </button>
                 <span className="nx-footer-note">
                   {currentStep === 3
-                    ? "Letar installatörer nära dig…"
+                    ? installerFound
+                      ? "4+ installatörer hittade i ditt närområde"
+                      : "Letar installatörer nära dig…"
                     : currentStep < TOTAL_STEPS
                       ? "Gratis · Ingen bindning"
                       : "🔒 Dina uppgifter är säkra"}
@@ -793,10 +832,20 @@ export function Calculator({
                   <button
                     type="button"
                     className="nx-nav-btn primary"
-                    onClick={tryGoNext}
-                    disabled={currentStep === 1 && !solutionInterest}
+                    onClick={currentStep === 6 ? submitLead : tryGoNext}
+                    disabled={
+                      (currentStep === 1 && !solutionInterest) ||
+                      (currentStep === 4 &&
+                        !(isValidFullName(fullName) || (firstName.trim().length >= 2 && lastName.trim().length >= 2))) ||
+                      (currentStep === 5 && !isValidEmail(email.trim())) ||
+                      (currentStep === 6 && (!isValidPhone(phone) || submitStatus === "sending"))
+                    }
                   >
-                    Nästa →
+                    {currentStep === 6
+                      ? submitStatus === "sending"
+                        ? "Skickar…"
+                        : "Få kostnadsfria offerter →"
+                      : "Nästa →"}
                   </button>
                 ) : null}
               </div>

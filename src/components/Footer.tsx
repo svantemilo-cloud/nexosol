@@ -1,6 +1,6 @@
 "use client";
 
-import { Sun, Facebook, Linkedin, Twitter } from "lucide-react";
+import { Facebook, Linkedin, Twitter } from "lucide-react";
 import { QuoteQuizLink } from "@/components/quote-quiz/QuoteQuizLink";
 
 const socialLinks = [
@@ -73,9 +73,14 @@ export function Footer() {
           ))}
         </div>
         <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between flex-wrap gap-4">
-          <span className="font-bold text-lg flex items-center gap-2">
-            <Sun className="w-6 h-6 text-neon-lime" aria-hidden />
-            Nexosol
+          <span className="flex items-center gap-2">
+            <img
+              src="/nexosol-wordmark-white.png"
+              alt="Nexosol"
+              className="h-6 w-auto"
+              loading="lazy"
+              decoding="async"
+            />
           </span>
           <nav className="flex items-center gap-4" aria-label="Sociala medier">
             {socialLinks.map(({ label, href, icon: Icon }) => (
