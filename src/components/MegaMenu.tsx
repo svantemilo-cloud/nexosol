@@ -8,7 +8,6 @@ const INFO_LINKS = [
   { href: "/artiklar", label: "Kunskapsbank" },
   { href: "/artiklar", label: "Pris & ekonomi" },
   { href: "/#calculator", label: "Kalkylator" },
-  { href: "/#how-it-works", label: "Så fungerar det" },
 ];
 
 const LAGAR_LINKS = [

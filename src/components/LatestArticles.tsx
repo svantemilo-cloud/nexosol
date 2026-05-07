@@ -18,7 +18,7 @@ export function LatestArticles() {
 
   return (
     <Gallery4
-      title="Senaste artiklar"
+      title="Våra Guider"
       description="Guider om solceller, pris, lönsamhet och underhåll från vår kunskapsbank."
       items={items}
       archiveHref="/artiklar"

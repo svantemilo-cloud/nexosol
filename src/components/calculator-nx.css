@@ -1046,3 +1046,10 @@
   color: var(--nx-gray);
   line-height: 1.35;
 }
+
+/* Startsida: vänsterpanel har egen yttre padding — slå ihop med rubrik */
+.nx-calculator-root.nx-calculator-page-ref .nx-body,
+.nx-calculator-root.nx-calculator-page-ref .nx-footer {
+  padding-left: 0;
+  padding-right: 0;
+}

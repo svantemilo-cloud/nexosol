@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
-import { ShieldCheck, BadgePercent, Clock, Award, CheckCircle2, Info, Lock } from "lucide-react";
+import { CheckCircle2, Info, Lock } from "lucide-react";
 import { useAddressSuggest } from "@/hooks/use-address-suggest";
+import { CalculatorPageEmbedded } from "@/components/CalculatorPageEmbedded";
 import "./calculator-nx.css";
 
 type RegionKey = "norra" | "mellersta" | "sodra" | "skane";
@@ -113,12 +114,11 @@ const AMOUNTS_VISIBLE_FROM_STEP = 99;
 const INSTALLER_SEARCH_MS = 3400;
 const INSTALLER_FOUND_AT_MS = 1700;
 
-export function Calculator({
-  variant = "page",
+function CalculatorModal({
   onRequestClose,
   initialSolution = null,
   initialAddress = null,
-}: CalculatorProps) {
+}: Omit<CalculatorProps, "variant">) {
   const trimmedInitAddr = initialAddress?.trim() ?? "";
   const skipSolSelectionWithAddress = trimmedInitAddr.length >= 4;
   const initialSolutionResolved: SolutionKey | null =
@@ -350,80 +350,14 @@ export function Calculator({
     ? 100
     : Math.round((currentStep / TOTAL_STEPS) * 100);
 
-  const rootClass =
-    variant === "modal"
-      ? "nx-calculator-root nx-calculator--modal py-4 px-2 sm:px-3 bg-transparent"
-      : "nx-calculator-root py-10 px-4 sm:px-6 scroll-mt-24 bg-[#f4f6f4]";
+  const rootClass = "nx-calculator-root nx-calculator--modal py-4 px-2 sm:px-3 bg-transparent";
 
-  const Root = variant === "page" ? "section" : "div";
+  const Root = "div";
 
-  return (
-    <Root {...(variant === "page" ? { id: "calculator" } : {})} className={rootClass}>
-      <div className="nx-wrap">
-        {variant === "page" ? (
-          <div className="nx-logo">
-            <svg className="nx-logo-sun" viewBox="0 0 28 28" fill="none" aria-hidden>
-              <circle cx="14" cy="14" r="5" fill="currentColor" />
-              <g stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <line x1="14" y1="2" x2="14" y2="5" />
-                <line x1="14" y1="23" x2="14" y2="26" />
-                <line x1="2" y1="14" x2="5" y2="14" />
-                <line x1="23" y1="14" x2="26" y2="14" />
-                <line x1="5.5" y1="5.5" x2="7.6" y2="7.6" />
-                <line x1="20.4" y1="20.4" x2="22.5" y2="22.5" />
-                <line x1="22.5" y1="5.5" x2="20.4" y2="7.6" />
-                <line x1="7.6" y1="20.4" x2="5.5" y2="22.5" />
-              </g>
-            </svg>
-            <span className="nx-logo-text">Nexosol</span>
-          </div>
-        ) : null}
-
-        <div className="nx-card">
-          {variant === "modal" ? (
-            <div
-              className="nx-quiz-progress"
-              role="progressbar"
-              aria-valuenow={progressPct}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label={`Framsteg ${progressPct} procent`}
-            >
-              <div
-                className="nx-quiz-progress-fill"
-                style={{
-                  width: `${progressPct}%`,
-                  minWidth: progressPct > 0 ? "2.25rem" : undefined,
-                }}
-              >
-                <span className="nx-quiz-progress-label">{progressPct}%</span>
-              </div>
-            </div>
-          ) : null}
-          <div className="nx-card-header">
-            <h2 className="nx-card-title">Vad kostar solceller för dig?</h2>
-            <div className="nx-card-sub">
-              Jämför offerter enkelt, kostnadsfritt och bindningsfritt.
-            </div>
-          </div>
-          <div className="nx-savings-bar">
-            <div className={amountsRevealed ? undefined : "nx-amount-blur"}>
-              <div className="nx-savings-label">Uppskattad besparing per år</div>
-              <div className="nx-savings-amount">{fmt(calc.savings)} kr</div>
-            </div>
-            <div className={amountsRevealed ? undefined : "nx-amount-blur"}>
-              <div className="nx-savings-badge">
-                +{fmt(calc.savings * 25)} kr / 25 år
-              </div>
-            </div>
-          </div>
-
-          {!showSuccess && (
-            <>
+  const wizardInteractive = !showSuccess ? (
+    <>
               <div className="nx-body" id="mainBody">
-                <div
-                  className={`nx-steps${variant === "modal" ? " nx-steps--modal-hide" : ""}`}
-                >
+                <div className="nx-steps nx-steps--modal-hide">
                   {Array.from({ length: TOTAL_STEPS }, (_, idx) => idx + 1).map((i) => (
                     <div
                       key={i}
@@ -827,52 +761,101 @@ export function Calculator({
                   </button>
                 ) : null}
               </div>
-            </>
-          )}
+    </>
+  ) : null;
 
-          <div className={`success-screen ${showSuccess ? "visible" : ""}`} id="successScreen">
-            <div className="success-icon">🎉</div>
-            <h3 className="success-title">Din offert är upplåst!</h3>
-            <div className="success-sub">
-              Vi skickar din fullständiga offert till <strong>{email.trim()}</strong> inom 24 timmar.
-              Certifierade installatörer nära dig kontaktar dig med konkreta priser.
-            </div>
-            <div className="success-summary">
-              <h3 className="offert-summary-title" style={{ marginBottom: 10 }}>
-                Din offert
-              </h3>
-              <div className="success-row">
-                <span>Besparing per år</span>
-                <span className="success-row-val">{fmt(calc.savings)} kr/år</span>
-              </div>
-              <div className="success-row">
-                <span>Systemkostnad efter ROT</span>
-                <span className="success-row-val">{fmt(calc.installAfterROT)} kr</span>
-              </div>
-              <div className="success-row">
-                <span>Återbetalningstid</span>
-                <span className="success-row-val">{calc.payback.toFixed(1)} år</span>
-              </div>
-              <div className="success-row">
-                <span>Vinst över 25 år</span>
-                <span className="success-row-val">{fmt(calc.profit25)} kr</span>
-              </div>
-            </div>
-            <div className="success-next">
-              Nästa steg: Kolla din e-post · Jämför offerter · Välj installatör
-            </div>
-            {variant === "modal" && onRequestClose ? (
-              <button
-                type="button"
-                className="nx-modal-done-btn"
-                onClick={onRequestClose}
+  return (
+    <Root className={rootClass}>
+        <div className="nx-wrap">
+          <div className="nx-card">
+            <div
+              className="nx-quiz-progress"
+              role="progressbar"
+              aria-valuenow={progressPct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`Framsteg ${progressPct} procent`}
+            >
+              <div
+                className="nx-quiz-progress-fill"
+                style={{
+                  width: `${progressPct}%`,
+                  minWidth: progressPct > 0 ? "2.25rem" : undefined,
+                }}
               >
-                Stäng
-              </button>
-            ) : null}
+                <span className="nx-quiz-progress-label">{progressPct}%</span>
+              </div>
+            </div>
+            <div className="nx-card-header">
+              <h2 className="nx-card-title">Vad kostar solceller för dig?</h2>
+              <div className="nx-card-sub">
+                Jämför offerter enkelt, kostnadsfritt och bindningsfritt.
+              </div>
+            </div>
+            <div className="nx-savings-bar">
+              <div className={amountsRevealed ? undefined : "nx-amount-blur"}>
+                <div className="nx-savings-label">Uppskattad besparing per år</div>
+                <div className="nx-savings-amount">{fmt(calc.savings)} kr</div>
+              </div>
+              <div className={amountsRevealed ? undefined : "nx-amount-blur"}>
+                <div className="nx-savings-badge">
+                  +{fmt(calc.savings * 25)} kr / 25 år
+                </div>
+              </div>
+            </div>
+            {wizardInteractive}
+            <div className={`success-screen ${showSuccess ? "visible" : ""}`} id="successScreen">
+              <div className="success-icon">🎉</div>
+              <h3 className="success-title">Din offert är upplåst!</h3>
+              <div className="success-sub">
+                Vi skickar din fullständiga offert till <strong>{email.trim()}</strong> inom 24 timmar.
+                Certifierade installatörer nära dig kontaktar dig med konkreta priser.
+              </div>
+              <div className="success-summary">
+                <h3 className="offert-summary-title" style={{ marginBottom: 10 }}>
+                  Din offert
+                </h3>
+                <div className="success-row">
+                  <span>Besparing per år</span>
+                  <span className="success-row-val">{fmt(calc.savings)} kr/år</span>
+                </div>
+                <div className="success-row">
+                  <span>Systemkostnad efter ROT</span>
+                  <span className="success-row-val">{fmt(calc.installAfterROT)} kr</span>
+                </div>
+                <div className="success-row">
+                  <span>Återbetalningstid</span>
+                  <span className="success-row-val">{calc.payback.toFixed(1)} år</span>
+                </div>
+                <div className="success-row">
+                  <span>Vinst över 25 år</span>
+                  <span className="success-row-val">{fmt(calc.profit25)} kr</span>
+                </div>
+              </div>
+              <div className="success-next">
+                Nästa steg: Kolla din e-post · Jämför offerter · Välj installatör
+              </div>
+              {onRequestClose ? (
+                <button type="button" className="nx-modal-done-btn" onClick={onRequestClose}>
+                  Stäng
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
-      </div>
     </Root>
   );
+}
+
+export function Calculator(props: CalculatorProps) {
+  if (props.variant === "modal") {
+    return (
+      <CalculatorModal
+        onRequestClose={props.onRequestClose}
+        initialSolution={props.initialSolution ?? null}
+        initialAddress={props.initialAddress ?? null}
+      />
+    );
+  }
+  return <CalculatorPageEmbedded />;
 }

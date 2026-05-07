@@ -12,7 +12,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, "..", "public");
 
 /** Resize to fit width ≤ target; never upscale. Output descriptor = actual pixel width (w descriptor). */
-async function writeResponsiveVariants(relPng, targetWidths, capInfinity = Infinity) {
+async function writeResponsiveVariants(relPng, targetWidths, capInfinity = Infinity, codec = {}) {
+  const avifQ = codec.avifQuality ?? 65;
+  const webpQ = codec.webpQuality ?? 82;
   const absIn = path.join(publicDir, relPng);
   const stem = path.join(publicDir, relPng.replace(/\.png$/i, ""));
   const meta = await sharp(absIn).metadata();
@@ -33,9 +35,9 @@ async function writeResponsiveVariants(relPng, targetWidths, capInfinity = Infin
     });
     await resized
       .clone()
-      .avif({ quality: 65, effort: 4 })
+      .avif({ quality: avifQ, effort: 4 })
       .toFile(`${base}.avif`);
-    await resized.clone().webp({ quality: 82 }).toFile(`${base}.webp`);
+    await resized.clone().webp({ quality: webpQ }).toFile(`${base}.webp`);
     console.warn(`✓ ${relPng} → ${outW}px (avif + webp)`);
   }
 }
@@ -50,7 +52,11 @@ async function encodeOnly(relPng) {
 }
 
 async function main() {
-  await writeResponsiveVariants("hero-solar.png", [640, 828, 1024], 1024);
+  /* Fullskärms hjälte: lite högre kvalitet än övrigt (bred yta på stora skärmar). */
+  await writeResponsiveVariants("hero-solar.png", [640, 828, 1024], 1024, {
+    avifQuality: 72,
+    webpQuality: 88,
+  });
   await writeResponsiveVariants("compare-hero.png", [640, 828, 1024], 1024);
 
   await encodeOnly("sweden-lan-map.png");

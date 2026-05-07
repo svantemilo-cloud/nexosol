@@ -42,10 +42,10 @@ export function Hero() {
             alt=""
             pngSrc="/hero-solar.png"
             width={1024}
-            height={580}
+            height={585}
             loading="eager"
             fetchPriority="high"
-            className="hero-fullbleed absolute inset-0 size-full origin-center scale-[1.02] object-cover object-[center_42%] lg:scale-[1.014] lg:object-[58%_38%] xl:object-[60%_35%]"
+            className="hero-fullbleed absolute inset-0 size-full origin-center scale-[1.02] object-cover object-[48%_42%] sm:scale-[1.025] lg:scale-[1.018] lg:object-[50%_40%] xl:object-[52%_38%]"
           />
         </div>
         {/* Diskret läsbarhetsgradient: tätare till vänster så huset syns till höger */}

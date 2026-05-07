@@ -1,7 +1,7 @@
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.nexosol.se";
 
 /** Kort passages lämpade för uppläsning (TTS); pekar på konkret markup via CSS-selektorer. */
-const SPEAKABLE_SELECTORS = ["#nx-speakable-hero", "#nx-speakable-process"] as const;
+const SPEAKABLE_SELECTORS = ["#nx-speakable-hero"] as const;
 
 /**
  * Speakable (schema.org på WebPage) – markerar avsnitt som passar för röstsök / TTS.

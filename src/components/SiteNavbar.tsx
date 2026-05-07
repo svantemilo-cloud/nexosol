@@ -93,10 +93,6 @@ const SITE_MENU: MenuBranch[] = [
     ],
   },
   {
-    title: "Om oss",
-    url: "/#om-oss",
-  },
-  {
     title: "Kunskapsbank",
     url: "/artiklar",
     items: [
@@ -162,8 +158,12 @@ export function SiteNavbar({ overlayNav }: SiteNavbarProps) {
   /** Transparent hero (startsida topp) */
   const overlayTrigger = overlayNav;
 
+  /** 15 % större än text-sm (0,875 rem), fet text för Lösningar / Kunskapsbank / Kalkylator */
+  const navTopSize = "text-[calc(0.875rem*1.15)]";
+
   const leafLink = cn(
-    "inline-flex h-10 items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+    "inline-flex h-10 items-center rounded-lg px-3 py-2 font-bold transition-colors",
+    navTopSize,
     overlayTrigger
       ? "text-white/95 hover:bg-white/15 hover:text-white focus-visible:ring-white/60"
       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -171,7 +171,8 @@ export function SiteNavbar({ overlayNav }: SiteNavbarProps) {
   );
 
   const megaTrigger = cn(
-    "h-10 gap-1 text-sm font-medium",
+    "h-10 gap-1 font-bold",
+    navTopSize,
     overlayTrigger &&
       "text-white/95 hover:bg-white/15 hover:text-white data-[state=open]:bg-white/15 data-[state=open]:text-white",
   );
@@ -331,7 +332,12 @@ export function SiteNavbar({ overlayNav }: SiteNavbarProps) {
                         value={item.title}
                         className="border-b-0 px-1"
                       >
-                        <AccordionTrigger className="py-2 font-semibold text-forest hover:no-underline">
+                        <AccordionTrigger
+                          className={cn(
+                            "py-2 font-bold text-forest hover:no-underline",
+                            navTopSize,
+                          )}
+                        >
                           {item.title}
                         </AccordionTrigger>
                         <AccordionContent className="mt-1 pb-3 pl-0">
@@ -365,7 +371,7 @@ export function SiteNavbar({ overlayNav }: SiteNavbarProps) {
                         <SheetClose asChild>
                           <Link
                             href={item.url}
-                            className="font-semibold text-forest"
+                            className={cn("font-bold text-forest", navTopSize)}
                             onClick={(e) => handleNavHref(e, item.url)}
                           >
                             {item.title}

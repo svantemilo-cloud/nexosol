@@ -44,6 +44,13 @@ main img.hero-fullbleed {
   height: 100%;
 }
 
+/* Statistik‑sektion: fyrkantig crop i avrundad ram */
+main img.stats-visual-cover {
+  max-width: none;
+  width: 100%;
+  height: 100%;
+}
+
 /* Explicita screen-brytpunkter + mobil layout (tidigare separat fil – nu bundlat = ett render-blocking CSS-anrop mindre) */
 @media screen and (max-width: 479px) {
   :root {
