@@ -86,7 +86,7 @@ export function CookieBanner() {
               inklusive för analys och personanpassad annonsering.
             </p>
             <p className="mt-3 text-sm">
-              <Link href="/integritetspolicy" className="text-coral underline underline-offset-2 hover:opacity-90">
+              <Link href="/integritetspolicy" className="font-medium text-forest underline underline-offset-2 hover:text-forest-light hover:opacity-95">
                 Läs mer i vår integritetspolicy
               </Link>
             </p>

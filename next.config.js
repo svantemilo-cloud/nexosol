@@ -7,11 +7,14 @@ const isProd = process.env.NODE_ENV === "production";
  * Strama åt script‑white‑list löpande när taggar är frysade.
  */
 function contentSecurityPolicy() {
+  // Without 'unsafe-eval' some Next/Chromium-byggen eller tillägg stoppar bundles → halv sidor
+  // förblir med opacity:0 (Framer) och interaktiva komponenter slutar svara likadant lokalt och i prod‑preview.
+  const scriptSrc = "'self' 'unsafe-inline' 'unsafe-eval' https:";
   return [
     "default-src 'self'",
     // unsafe-inline = inline bootstrap + strukturerade data‑skript i layout.
     // https: tillåter skript domäner som GTM injicerar vid körning.
-    "script-src 'self' 'unsafe-inline' https:",
+    `script-src ${scriptSrc}`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https: blob:",
     "font-src 'self' https://fonts.gstatic.com data:",
@@ -61,6 +64,13 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 7,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
+    ],
   },
 
   async headers() {

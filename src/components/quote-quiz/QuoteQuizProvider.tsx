@@ -14,6 +14,8 @@ import { Calculator, type SolutionKey } from "@/components/Calculator";
 
 export type QuoteQuizOpenOptions = {
   solution?: SolutionKey;
+  /** Förifyll adress och hoppa till steg 2 (modal) när värdet är tillräckligt långt */
+  initialAddress?: string;
 };
 
 type QuoteQuizContextValue = {
@@ -112,6 +114,7 @@ function QuoteQuizModal({
           <Calculator
             variant="modal"
             initialSolution={openOptions?.solution}
+            initialAddress={openOptions?.initialAddress}
             onRequestClose={onClose}
           />
         </div>

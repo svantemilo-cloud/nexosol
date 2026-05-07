@@ -13,19 +13,20 @@ export default function GlobalError({
 }) {
   return (
     <html lang="sv">
-      <head />
-      <body
-        style={{
-          margin: 0,
-          fontFamily: UI_SANS,
-          padding: "2rem",
-          background: "#f9fafb",
-          color: "#065a45",
-        }}
-      >
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Nexosol</title>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `*{box-sizing:border-box}body{margin:0;font-family:${UI_SANS};padding:2rem;background:#f9fafb;color:#065a45;line-height:1.5}h1{font-size:1.5rem;margin:0 0 1rem}p{margin:0 0 1rem;color:#374151}button{font:inherit}`,
+          }}
+        />
+      </head>
+      <body>
         <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-          <h1 style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>Något gick fel</h1>
-          <p style={{ marginBottom: "1rem", color: "#374151" }}>{error.message || "Ett oväntat fel inträffade."}</p>
+          <h1>Något gick fel</h1>
+          <p>{error.message || "Ett oväntat fel inträffade."}</p>
           <button
             type="button"
             onClick={() => reset()}

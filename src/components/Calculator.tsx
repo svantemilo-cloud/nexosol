@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { ShieldCheck, BadgePercent, Clock, Award, CheckCircle2, Info, Lock } from "lucide-react";
+import { useAddressSuggest } from "@/hooks/use-address-suggest";
 import "./calculator-nx.css";
 
 type RegionKey = "norra" | "mellersta" | "sodra" | "skane";
@@ -19,6 +20,8 @@ export type CalculatorProps = {
   onRequestClose?: () => void;
   /** Förifyll steg 1 när quiz öppnas från en produkt-CTA */
   initialSolution?: SolutionKey | null;
+  /** Öppnad från t.ex. startsidans hero – förifyll adress och hoppa till steg 2 */
+  initialAddress?: string | null;
 };
 
 const SOLUTION_LABELS: Record<SolutionKey, string> = {
@@ -114,11 +117,17 @@ export function Calculator({
   variant = "page",
   onRequestClose,
   initialSolution = null,
+  initialAddress = null,
 }: CalculatorProps) {
-  const [currentStep, setCurrentStep] = useState(() => (initialSolution ? 2 : 1));
-  const [solutionInterest, setSolutionInterest] = useState<SolutionKey | null>(
-    initialSolution ?? null,
+  const trimmedInitAddr = initialAddress?.trim() ?? "";
+  const skipSolSelectionWithAddress = trimmedInitAddr.length >= 4;
+  const initialSolutionResolved: SolutionKey | null =
+    initialSolution ?? (skipSolSelectionWithAddress ? "solceller" : null);
+  const [currentStep, setCurrentStep] = useState(() =>
+    initialSolution || skipSolSelectionWithAddress ? 2 : 1,
   );
+  const [solutionInterest, setSolutionInterest] =
+    useState<SolutionKey | null>(initialSolutionResolved);
   const [addressError, setAddressError] = useState(false);
   const [consumption, setConsumption] = useState(10000);
   const [roofArea, setRoofArea] = useState(50);
@@ -129,12 +138,16 @@ export function Calculator({
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [addressSuggestions, setAddressSuggestions] = useState<string[]>([]);
-  const [addressSuggestOpen, setAddressSuggestOpen] = useState(false);
-  const [addressSuggestLoading, setAddressSuggestLoading] = useState(false);
-  // När användaren väljer ett förslag vill vi inte auto-öppna listan igen direkt via fetch-effekten.
-  const [addressSuggestLocked, setAddressSuggestLocked] = useState(false);
+  const [address, setAddress] = useState(trimmedInitAddr);
+  const {
+    suggestions: addressSuggestions,
+    open: addressSuggestOpen,
+    setOpen: setAddressSuggestOpen,
+    loading: addressSuggestLoading,
+    locked: addressSuggestLocked,
+    pickSuggestion: finalizeAddressPick,
+    unlock: unlockAddressSuggest,
+  } = useAddressSuggest(address, currentStep === 2);
   const [installerFound, setInstallerFound] = useState(false);
   const [emailError, setEmailError] = useState(false);
   /** Honeypot — ska lämnas tom (undvik namn som "fax" pga webbläsarens autofill). */
@@ -191,43 +204,6 @@ export function Calculator({
       window.clearTimeout(tNext);
     };
   }, [currentStep]);
-
-  useEffect(() => {
-    if (currentStep !== 2) return;
-    const q = address.trim();
-    if (q.length < 3) {
-      setAddressSuggestions([]);
-      setAddressSuggestLoading(false);
-      return;
-    }
-    let cancelled = false;
-    setAddressSuggestLoading(true);
-    const t = window.setTimeout(() => {
-      fetch(`/api/address-suggest?q=${encodeURIComponent(q)}`)
-        .then((r) => r.json() as Promise<{ suggestions?: { label?: string }[] }>)
-        .then((json) => {
-          if (cancelled) return;
-          const s = (json.suggestions ?? [])
-            .map((x) => (typeof x.label === "string" ? x.label : ""))
-            .filter(Boolean)
-            .slice(0, 6);
-          setAddressSuggestions(s);
-          if (!addressSuggestLocked) setAddressSuggestOpen(true);
-        })
-        .catch(() => {
-          if (cancelled) return;
-          setAddressSuggestions([]);
-        })
-        .finally(() => {
-          if (cancelled) return;
-          setAddressSuggestLoading(false);
-        });
-    }, 180);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(t);
-    };
-  }, [address, currentStep, addressSuggestLocked]);
 
   const navigate = useCallback((dir: number) => {
     setCurrentStep((s) => Math.max(1, Math.min(TOTAL_STEPS, s + dir)));
@@ -519,7 +495,7 @@ export function Calculator({
                       placeholder="Exempelgatan 12, 123 45 Stad"
                       value={address}
                       onChange={(e) => {
-                        setAddressSuggestLocked(false);
+                        unlockAddressSuggest();
                         setAddress(e.target.value);
                         setAddressError(false);
                       }}
@@ -539,10 +515,8 @@ export function Calculator({
                             className="nx-suggest-item"
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={() => {
-                              setAddressSuggestLocked(true);
                               setAddress(s);
-                              setAddressSuggestOpen(false);
-                              setAddressSuggestions([]);
+                              finalizeAddressPick();
                             }}
                           >
                             {s}

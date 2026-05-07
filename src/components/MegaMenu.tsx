@@ -62,14 +62,14 @@ export function MegaMenu() {
                     {item.href === "/#calculator" ? (
                       <QuoteQuizLink
                         href="/#calculator"
-                        className="text-gray-900 hover:text-coral transition-colors cursor-pointer block py-2.5 px-3 -mx-3 rounded-lg hover:bg-gray-50"
+                        className="text-gray-900 hover:text-forest-light transition-colors cursor-pointer block py-2.5 px-3 -mx-3 rounded-lg hover:bg-gray-50"
                       >
                         {item.label}
                       </QuoteQuizLink>
                     ) : (
                       <Link
                         href={item.href}
-                        className="text-gray-900 hover:text-coral transition-colors cursor-pointer block py-2.5 px-3 -mx-3 rounded-lg hover:bg-gray-50"
+                        className="text-gray-900 hover:text-forest-light transition-colors cursor-pointer block py-2.5 px-3 -mx-3 rounded-lg hover:bg-gray-50"
                       >
                         {item.label}
                       </Link>
@@ -91,7 +91,7 @@ export function MegaMenu() {
                       href={item.href}
                       className="group block py-2.5 px-3 -mx-3 rounded-lg hover:bg-gray-50 cursor-pointer"
                     >
-                      <span className="text-gray-900 font-medium group-hover:text-coral transition-colors">
+                      <span className="text-gray-900 font-medium group-hover:text-forest-light transition-colors">
                         {item.label}
                       </span>
                       <p className="text-sm text-gray-600 mt-0.5 cursor-default">
@@ -113,7 +113,7 @@ export function MegaMenu() {
                   <li key={item.label}>
                     <Link
                       href={item.href}
-                      className="text-gray-900 hover:text-coral transition-colors cursor-pointer block py-2.5 px-3 -mx-3 rounded-lg hover:bg-gray-50"
+                      className="text-gray-900 hover:text-forest-light transition-colors cursor-pointer block py-2.5 px-3 -mx-3 rounded-lg hover:bg-gray-50"
                     >
                       {item.label}
                     </Link>
@@ -124,7 +124,7 @@ export function MegaMenu() {
 
             {/* Kolumn 4: CTA */}
             <div className="sm:col-span-2 lg:col-span-1 lg:flex lg:flex-col">
-              <div className="bg-coral/5 rounded-xl p-5 border border-coral/10">
+              <div className="rounded-xl border border-forest/15 bg-forest/[0.06] p-5">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">
                   Få ytterligare kunskap?
                 </h3>
@@ -133,7 +133,7 @@ export function MegaMenu() {
                 </p>
                 <Link
                   href="/artiklar"
-                  className="inline-flex items-center justify-center rounded-xl bg-coral text-white font-semibold px-5 py-3 hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer text-sm w-full"
+                  className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-forest-light active:scale-[0.98]"
                 >
                   Besök kunskapsbanken
                 </Link>

@@ -206,14 +206,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="sv" className={`scroll-smooth ${montserrat.variable}`}>
-      <head>
-        {/* Kritisk minimal CSS innan Tailwind-bundlen; mobil-/SEO-media queries ligger i globals.css */}
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `:where(html){font-family:var(--font-sans),ui-sans-serif,system-ui,sans-serif}:where(body){margin:0;background:#f9fafb;color:#065a45}`,
-          }}
-        />
-      </head>
       <body
         className="antialiased text-forest min-h-screen font-sans"
         style={{ backgroundColor: "#f9fafb", color: "#065a45" }}

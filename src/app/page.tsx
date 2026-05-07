@@ -1,7 +1,7 @@
 import { VisitTracker } from "@/components/VisitTracker";
 import { Hero } from "@/components/Hero";
-import { InstallerMarquee } from "@/components/InstallerMarquee";
 import { CompareCard } from "@/components/CompareCard";
+import { SolarHouseComparison } from "@/components/SolarHouseComparison";
 import { ValueCards } from "@/components/ValueCards";
 import { ProductCards } from "@/components/ProductCards";
 import { AnimatedStats } from "@/components/AnimatedStats";
@@ -20,8 +20,8 @@ export default function Home() {
       <VisitTracker />
       <SpeakableJsonLd />
       <Hero />
-      <InstallerMarquee />
       <CompareCard />
+      <SolarHouseComparison />
       <ValueCards />
       <ProductCards />
       <AnimatedStats />
