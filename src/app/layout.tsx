@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { ClientProviders } from "@/components/ClientProviders";
-import { GtmHead } from "@/components/cookies/GtmClient";
 import { ConditionalHeader } from "@/components/ConditionalHeader";
 import { articles } from "@/lib/articles";
 import {
@@ -24,7 +23,13 @@ const montserrat = Montserrat({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.nexosol.se";
-const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+
+const GTM_ID = "GTM-TPXPZL7K";
+const gtmScript = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${GTM_ID}');`;
 
 const homePublishedIso = toIsoDateTimeUtc(sitePublishedDate());
 const homeModifiedIso = toIsoDateTimeUtc(siteModifiedDate());
@@ -208,22 +213,20 @@ export default function RootLayout({
   return (
     <html lang="sv" className={`scroll-smooth ${montserrat.variable}`}>
       <head>
-        <GtmHead gtmId={gtmId} />
+        <script dangerouslySetInnerHTML={{ __html: gtmScript }} />
       </head>
       <body
         className="antialiased text-forest min-h-screen font-sans"
         style={{ backgroundColor: "#f9fafb", color: "#065a45" }}
       >
-        {gtmId ? (
-          <noscript>
-            <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
-              height="0"
-              width="0"
-              style={{ display: "none", visibility: "hidden" }}
-            />
-          </noscript>
-        ) : null}
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
         <ClientProviders>
           {children}
           <ConditionalHeader />
