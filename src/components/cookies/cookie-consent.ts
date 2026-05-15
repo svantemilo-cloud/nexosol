@@ -35,5 +35,9 @@ export function writeCookieConsent(consent: CookieConsent) {
     const maxAge = 60 * 60 * 24 * 365; // 1 year
     document.cookie = `${STORAGE_KEY}=${value}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
   } catch {}
+
+  try {
+    window.dispatchEvent(new Event("nx-cookie-consent"));
+  } catch {}
 }
 

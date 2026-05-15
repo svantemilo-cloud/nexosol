@@ -164,7 +164,7 @@ export function CalculatorPageEmbedded() {
       : 0;
 
   const refIconCell = (node: ReactNode) => (
-    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e4ebe2] text-[#394d42] [&>svg]:h-[18px] [&>svg]:w-[18px]">
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e4ebe2] text-[#394d42] sm:h-10 sm:w-10 [&>svg]:h-[15px] [&>svg]:w-[15px] sm:[&>svg]:h-[18px] sm:[&>svg]:w-[18px]">
       {node}
     </span>
   );
@@ -221,17 +221,17 @@ export function CalculatorPageEmbedded() {
   const rangeStyle = { accentColor: "#394d42" } as CSSProperties;
 
   const resultsAside = (
-    <div className="relative mx-auto flex h-full min-h-0 w-full max-w-[820px] flex-1 flex-col">
-      <div className="relative isolate flex h-full min-h-0 flex-1 flex-col bg-[#fcfcfc] px-5 pb-6 sm:px-8 sm:pb-7">
+    <div className="relative mx-auto flex w-full max-w-[820px] flex-col lg:h-full lg:min-h-0 lg:flex-1">
+      <div className="relative isolate flex w-full flex-col bg-[#fcfcfc] px-4 pb-5 sm:px-8 sm:pb-7 lg:h-full lg:min-h-0 lg:flex-1">
         <header className="shrink-0 border-b border-[#e1e1e1] px-1 pb-3 pt-1 lg:px-0">
           <h3 className="text-center text-[1.1rem] font-bold leading-tight tracking-tight text-[#305a42] lg:text-left lg:text-[1.25rem]">
             Dina resultat
           </h3>
         </header>
 
-        <div className="mt-2 flex min-h-0 flex-1 flex-col">
+        <div className="mt-2 flex min-h-0 flex-1 flex-col lg:min-h-0">
         <div
-          className="mb-4 flex rounded-[999px] bg-[#f8f6f3] p-1.5 sm:p-2"
+          className="mb-4 grid grid-cols-2 gap-1.5 rounded-xl bg-[#f8f6f3] p-1.5 sm:mb-4 sm:flex sm:rounded-[999px] sm:p-2"
           role="tablist"
           aria-label="Resultatvyer"
         >
@@ -248,7 +248,7 @@ export function CalculatorPageEmbedded() {
               type="button"
               role="tab"
               aria-selected={resultsTab === id}
-              className={`min-h-[40px] flex-1 rounded-full px-1.5 py-1.5 text-center text-[12px] font-medium leading-tight transition-colors sm:min-h-[44px] sm:px-2 sm:py-2 sm:text-[13px] md:text-[14px] ${resultsTab === id ? "bg-[#394d42] text-white" : "text-[#315a43] hover:bg-white/60"}`}
+              className={`min-h-[44px] w-full rounded-lg px-2 py-2 text-center text-[12px] font-medium leading-snug transition-colors sm:min-h-0 sm:flex-1 sm:rounded-full sm:py-2.5 sm:text-[13px] md:text-[14px] ${resultsTab === id ? "bg-[#394d42] text-white" : "text-[#315a43] hover:bg-white/60"}`}
               onClick={() => setResultsTab(id)}
             >
               {label}
@@ -258,50 +258,50 @@ export function CalculatorPageEmbedded() {
 
         {resultsTab === "besparing" ? (
           <>
-            <div className="mb-1 flex flex-wrap justify-center border-b border-[#e1e1e1]">
-              <div className="min-w-[46%] flex-1 border-r border-[#e1e1e1] px-3 py-3 text-center sm:px-6">
-                <div className="text-[13px] text-[#394d42]">Besparing år 1</div>
+            <div className="mb-1 flex min-w-0 flex-wrap justify-center border-b border-[#e1e1e1]">
+              <div className="min-w-0 flex-1 basis-[calc(50%-1px)] border-r border-[#e1e1e1] px-2 py-2.5 text-center sm:px-6 sm:py-3">
+                <div className="text-[11px] leading-tight text-[#394d42] sm:text-[13px]">Besparing år 1</div>
                 <div
-                  className={`mt-2 text-[1.75rem] font-bold leading-none text-[#305a42] sm:text-[2.15rem]`}
+                  className={`mt-1.5 text-[1.35rem] font-bold leading-none text-[#305a42] tabular-nums sm:mt-2 sm:text-[2.15rem]`}
                 >
                   {fmtMoney(pageCalc.savings)}
                 </div>
               </div>
-              <div className="min-w-[46%] flex-1 px-3 py-3 text-center sm:px-6">
-                <div className="text-[13px] text-[#394d42]">Återbetalning</div>
+              <div className="min-w-0 flex-1 basis-[calc(50%-1px)] px-2 py-2.5 text-center sm:px-6 sm:py-3">
+                <div className="text-[11px] leading-tight text-[#394d42] sm:text-[13px]">Återbetalning</div>
                 <div
-                  className={`mt-2 text-[1.75rem] font-bold leading-none text-[#305a42] sm:text-[2.15rem]`}
+                  className={`mt-1.5 text-[1.35rem] font-bold leading-none text-[#305a42] tabular-nums sm:mt-2 sm:text-[2.15rem]`}
                 >
                   {pageCalc.payback.toFixed(1)} år
                 </div>
               </div>
             </div>
-            <ul className="mb-2 text-[15px] text-[#1e221d]">
-              <li className="flex items-center gap-3 border-b border-[#e1e1e1] py-2.5">
+            <ul className="mb-2 text-[13px] text-[#1e221d] sm:text-[15px]">
+              <li className="flex items-start gap-2 border-b border-[#e1e1e1] py-2.5 sm:items-center sm:gap-3">
                 {refIconCell(<Wallet className="shrink-0" />)}
-                <span className="min-w-0 flex-1">Besparing på 25 år</span>
-                <span className={`shrink-0 pl-3 text-right font-semibold text-[#305a42]`}>
+                <span className="min-w-0 flex-1 break-words pr-1 leading-snug">Besparing på 25 år</span>
+                <span className="shrink-0 pl-1 text-right text-[13px] font-semibold tabular-nums text-[#305a42] sm:pl-3 sm:text-[15px]">
                   {fmtMoney(Math.max(pageCalc.profit25, 0))}
                 </span>
               </li>
-              <li className="flex items-center gap-3 border-b border-[#e1e1e1] py-2.5">
+              <li className="flex items-start gap-2 border-b border-[#e1e1e1] py-2.5 sm:items-center sm:gap-3">
                 {refIconCell(<BadgePercent className="shrink-0" />)}
-                <span className="min-w-0 flex-1">Grönt avdrag / ROT (indikativt)</span>
-                <span className={`shrink-0 pl-3 text-right font-semibold text-[#305a42]`}>
+                <span className="min-w-0 flex-1 break-words pr-1 leading-snug">Grönt avdrag / ROT (indikativt)</span>
+                <span className="shrink-0 pl-1 text-right text-[13px] font-semibold tabular-nums text-[#305a42] sm:pl-3 sm:text-[15px]">
                   {fmtMoney(rotRebateDisplay)}
                 </span>
               </li>
-              <li className="flex items-center gap-3 border-b border-[#e1e1e1] py-2.5">
+              <li className="flex items-start gap-2 border-b border-[#e1e1e1] py-2.5 sm:items-center sm:gap-3">
                 {refIconCell(<Receipt className="shrink-0" />)}
-                <span className="min-w-0 flex-1">Totalt du betalar (inkl. avdrag)</span>
-                <span className={`shrink-0 pl-3 text-right font-semibold text-[#305a42]`}>
+                <span className="min-w-0 flex-1 break-words pr-1 leading-snug">Totalt du betalar (inkl. avdrag)</span>
+                <span className="shrink-0 pl-1 text-right text-[13px] font-semibold tabular-nums text-[#305a42] sm:pl-3 sm:text-[15px]">
                   {fmtMoney(pageCalc.installAfterROT)}
                 </span>
               </li>
-              <li className="flex items-center gap-3 border-b border-[#e1e1e1] py-2.5">
+              <li className="flex items-start gap-2 border-b border-[#e1e1e1] py-2.5 sm:items-center sm:gap-3">
                 {refIconCell(<TrendingUp className="shrink-0" />)}
-                <span className="min-w-0 flex-1">Avkastning (25 år)</span>
-                <span className={`shrink-0 pl-3 text-right font-semibold text-[#305a42]`}>
+                <span className="min-w-0 flex-1 break-words pr-1 leading-snug">Avkastning (25 år)</span>
+                <span className="shrink-0 pl-1 text-right text-[13px] font-semibold tabular-nums text-[#305a42] sm:pl-3 sm:text-[15px]">
                   {roiReturnPct.toFixed(1)} %
                 </span>
               </li>
@@ -311,50 +311,50 @@ export function CalculatorPageEmbedded() {
 
         {resultsTab === "el" ? (
           <>
-            <div className="mb-1 flex flex-wrap justify-center border-b border-[#e1e1e1]">
-              <div className="min-w-[46%] flex-1 border-r border-[#e1e1e1] px-3 py-3 text-center sm:px-6">
-                <div className="text-[13px] text-[#394d42]">Ny snittfaktura (kvartal)</div>
+            <div className="mb-1 flex min-w-0 flex-wrap justify-center border-b border-[#e1e1e1]">
+              <div className="min-w-0 flex-1 basis-[calc(50%-1px)] border-r border-[#e1e1e1] px-2 py-2.5 text-center sm:px-6 sm:py-3">
+                <div className="text-[11px] leading-tight text-[#394d42] sm:text-[13px]">Ny snittfaktura (kvartal)</div>
                 <div
-                  className={`mt-2 text-[1.55rem] font-bold leading-none text-[#305a42] sm:text-[1.85rem]`}
+                  className={`mt-1.5 text-[1.35rem] font-bold leading-none text-[#305a42] tabular-nums sm:mt-2 sm:text-[1.85rem]`}
                 >
                   {fmtMoney(pageCalc.newQuarter)}
                 </div>
               </div>
-              <div className="min-w-[46%] flex-1 px-3 py-3 text-center sm:px-6">
-                <div className="text-[13px] text-[#394d42]">Uppskattad årsförbrukning</div>
+              <div className="min-w-0 flex-1 basis-[calc(50%-1px)] px-2 py-2.5 text-center sm:px-6 sm:py-3">
+                <div className="text-[11px] leading-tight text-[#394d42] sm:text-[13px]">Uppskattad årsförbrukning</div>
                 <div
-                  className={`mt-2 text-[1.55rem] font-bold leading-none text-[#305a42] sm:text-[1.85rem]`}
+                  className={`mt-1.5 text-[1.35rem] font-bold leading-none text-[#305a42] tabular-nums sm:mt-2 sm:text-[1.85rem]`}
                 >
                   {fmt(pageCalc.c)} kWh
                 </div>
               </div>
             </div>
-            <ul className="mb-2 text-[15px] text-[#1e221d]">
-              <li className="flex items-center gap-3 border-b border-[#e1e1e1] py-2.5">
+            <ul className="mb-2 text-[13px] text-[#1e221d] sm:text-[15px]">
+              <li className="flex items-start gap-2 border-b border-[#e1e1e1] py-2.5 sm:items-center sm:gap-3">
                 {refIconCell(<Sun className="shrink-0" />)}
-                <span className="min-w-0 flex-1">Sommar (ca kvartal)</span>
-                <span className={`shrink-0 pl-3 text-right font-semibold text-[#305a42]`}>
+                <span className="min-w-0 flex-1 break-words pr-1 leading-snug">Sommar (ca kvartal)</span>
+                <span className="shrink-0 pl-1 text-right text-[13px] font-semibold tabular-nums text-[#305a42] sm:pl-3 sm:text-[15px]">
                   {fmtMoney(pageCalc.seasonal.summer)}
                 </span>
               </li>
-              <li className="flex items-center gap-3 border-b border-[#e1e1e1] py-2.5">
+              <li className="flex items-start gap-2 border-b border-[#e1e1e1] py-2.5 sm:items-center sm:gap-3">
                 {refIconCell(<Zap className="shrink-0" />)}
-                <span className="min-w-0 flex-1">Höst (ca kvartal)</span>
-                <span className={`shrink-0 pl-3 text-right font-semibold text-[#305a42]`}>
+                <span className="min-w-0 flex-1 break-words pr-1 leading-snug">Höst (ca kvartal)</span>
+                <span className="shrink-0 pl-1 text-right text-[13px] font-semibold tabular-nums text-[#305a42] sm:pl-3 sm:text-[15px]">
                   {fmtMoney(pageCalc.seasonal.autumn)}
                 </span>
               </li>
-              <li className="flex items-center gap-3 border-b border-[#e1e1e1] py-2.5">
+              <li className="flex items-start gap-2 border-b border-[#e1e1e1] py-2.5 sm:items-center sm:gap-3">
                 {refIconCell(<Zap className="shrink-0" />)}
-                <span className="min-w-0 flex-1">Vinter (ca kvartal)</span>
-                <span className={`shrink-0 pl-3 text-right font-semibold text-[#305a42]`}>
+                <span className="min-w-0 flex-1 break-words pr-1 leading-snug">Vinter (ca kvartal)</span>
+                <span className="shrink-0 pl-1 text-right text-[13px] font-semibold tabular-nums text-[#305a42] sm:pl-3 sm:text-[15px]">
                   {fmtMoney(pageCalc.seasonal.winter)}
                 </span>
               </li>
-              <li className="flex items-center gap-3 border-b border-[#e1e1e1] py-2.5">
+              <li className="flex items-start gap-2 border-b border-[#e1e1e1] py-2.5 sm:items-center sm:gap-3">
                 {refIconCell(<Sun className="shrink-0" />)}
-                <span className="min-w-0 flex-1">Vår (ca kvartal)</span>
-                <span className={`shrink-0 pl-3 text-right font-semibold text-[#305a42]`}>
+                <span className="min-w-0 flex-1 break-words pr-1 leading-snug">Vår (ca kvartal)</span>
+                <span className="shrink-0 pl-1 text-right text-[13px] font-semibold tabular-nums text-[#305a42] sm:pl-3 sm:text-[15px]">
                   {fmtMoney(pageCalc.seasonal.spring)}
                 </span>
               </li>
@@ -367,36 +367,36 @@ export function CalculatorPageEmbedded() {
 
         {resultsTab === "utslapp" ? (
           <>
-            <div className="mb-1 flex flex-wrap justify-center border-b border-[#e1e1e1]">
-              <div className="min-w-[100%] px-3 py-3 text-center sm:px-6">
-                <div className="text-[13px] text-[#394d42]">Undvikit CO₂ (ca 25 år)</div>
+            <div className="mb-1 flex min-w-0 flex-wrap justify-center border-b border-[#e1e1e1]">
+              <div className="min-w-0 max-w-full px-2 py-2.5 text-center sm:px-6 sm:py-3">
+                <div className="text-[11px] leading-tight text-[#394d42] sm:text-[13px]">Undvikit CO₂ (ca 25 år)</div>
                 <div
-                  className={`mt-2 text-[1.65rem] font-bold leading-none text-[#305a42] sm:text-[1.95rem]`}
+                  className={`mt-1.5 text-[1.45rem] font-bold leading-none text-[#305a42] tabular-nums sm:mt-2 sm:text-[1.95rem]`}
                 >
                   {pageCalc.co2Life.toFixed(1)} ton
                 </div>
               </div>
             </div>
-            <p className="mb-3 text-[13px] font-medium text-[#394d42]">Motsvarar ungefär</p>
-            <ul className="mb-2 text-[15px] text-[#1e221d]">
-              <li className="flex items-center gap-3 border-b border-[#e1e1e1] py-2.5">
+            <p className="mb-2 text-[12px] font-medium text-[#394d42] sm:mb-3 sm:text-[13px]">Motsvarar ungefär</p>
+            <ul className="mb-2 text-[13px] text-[#1e221d] sm:text-[15px]">
+              <li className="flex items-start gap-2 border-b border-[#e1e1e1] py-2.5 sm:items-center sm:gap-3">
                 {refIconCell(<Sprout className="shrink-0" />)}
-                <span className="min-w-0 flex-1">Träd (jämförelse, 1 års klimatnytta)</span>
-                <span className={`shrink-0 pl-3 text-right font-semibold text-[#305a42]`}>
+                <span className="min-w-0 flex-1 break-words pr-1 leading-snug">Träd (jämförelse, 1 års klimatnytta)</span>
+                <span className="shrink-0 pl-1 text-right text-[13px] font-semibold tabular-nums text-[#305a42] sm:pl-3 sm:text-[15px]">
                   {fmt(pageCalc.treesApprox)}
                 </span>
               </li>
-              <li className="flex items-center gap-3 border-b border-[#e1e1e1] py-2.5">
+              <li className="flex items-start gap-2 border-b border-[#e1e1e1] py-2.5 sm:items-center sm:gap-3">
                 {refIconCell(<CarFront className="shrink-0" />)}
-                <span className="min-w-0 flex-1">Bilar “av vägen” (indikativt / år)</span>
-                <span className={`shrink-0 pl-3 text-right font-semibold text-[#305a42]`}>
+                <span className="min-w-0 flex-1 break-words pr-1 leading-snug">Bilar “av vägen” (indikativt / år)</span>
+                <span className="shrink-0 pl-1 text-right text-[13px] font-semibold tabular-nums text-[#305a42] sm:pl-3 sm:text-[15px]">
                   {pageCalc.carsApprox}
                 </span>
               </li>
-              <li className="flex items-center gap-3 border-b border-[#e1e1e1] py-2.5">
+              <li className="flex items-start gap-2 border-b border-[#e1e1e1] py-2.5 sm:items-center sm:gap-3">
                 {refIconCell(<Footprints className="shrink-0" />)}
-                <span className="min-w-0 flex-1">Motsvarande personers koldioxid (1 år)</span>
-                <span className={`shrink-0 pl-3 text-right font-semibold text-[#305a42]`}>
+                <span className="min-w-0 flex-1 break-words pr-1 leading-snug">Motsvarande personers koldioxid (1 år)</span>
+                <span className="shrink-0 pl-1 text-right text-[13px] font-semibold tabular-nums text-[#305a42] sm:pl-3 sm:text-[15px]">
                   {pageCalc.footprintPeople}
                 </span>
               </li>
@@ -406,43 +406,43 @@ export function CalculatorPageEmbedded() {
 
         {resultsTab === "system" ? (
           <>
-            <div className="mb-1 flex flex-wrap justify-center border-b border-[#e1e1e1]">
-              <div className="min-w-[46%] flex-1 border-r border-[#e1e1e1] px-3 py-3 text-center sm:px-6">
-                <div className="text-[13px] text-[#394d42]">Systemstorlek</div>
+            <div className="mb-1 flex min-w-0 flex-wrap justify-center border-b border-[#e1e1e1]">
+              <div className="min-w-0 flex-1 basis-[calc(50%-1px)] border-r border-[#e1e1e1] px-2 py-2.5 text-center sm:px-6 sm:py-3">
+                <div className="text-[11px] leading-tight text-[#394d42] sm:text-[13px]">Systemstorlek</div>
                 <div
-                  className={`mt-2 text-[1.75rem] font-bold leading-none text-[#305a42] sm:text-[2rem]`}
+                  className={`mt-1.5 text-[1.35rem] font-bold leading-none text-[#305a42] tabular-nums sm:mt-2 sm:text-[2rem]`}
                 >
                   {pageCalc.kwp.toFixed(1)} kW
                 </div>
               </div>
-              <div className="min-w-[46%] flex-1 px-3 py-3 text-center sm:px-6">
-                <div className="text-[13px] text-[#394d42]">Antal paneler</div>
+              <div className="min-w-0 flex-1 basis-[calc(50%-1px)] px-2 py-2.5 text-center sm:px-6 sm:py-3">
+                <div className="text-[11px] leading-tight text-[#394d42] sm:text-[13px]">Antal paneler</div>
                 <div
-                  className={`mt-2 text-[1.75rem] font-bold leading-none text-[#305a42] sm:text-[2rem]`}
+                  className={`mt-1.5 text-[1.35rem] font-bold leading-none text-[#305a42] tabular-nums sm:mt-2 sm:text-[2rem]`}
                 >
                   {pageCalc.panels} st
                 </div>
               </div>
             </div>
-            <ul className="mb-2 text-[15px] text-[#1e221d]">
-              <li className="flex items-center gap-3 border-b border-[#e1e1e1] py-2.5">
+            <ul className="mb-2 text-[13px] text-[#1e221d] sm:text-[15px]">
+              <li className="flex items-start gap-2 border-b border-[#e1e1e1] py-2.5 sm:items-center sm:gap-3">
                 {refIconCell(<Sun className="shrink-0" />)}
-                <span className="min-w-0 flex-1">Produktion per dag (snitt)</span>
-                <span className={`shrink-0 pl-3 text-right font-semibold text-[#305a42]`}>
+                <span className="min-w-0 flex-1 break-words pr-1 leading-snug">Produktion per dag (snitt)</span>
+                <span className="shrink-0 pl-1 text-right text-[13px] font-semibold tabular-nums text-[#305a42] sm:pl-3 sm:text-[15px]">
                   {(pageCalc.prod / 365).toFixed(1)} kWh
                 </span>
               </li>
-              <li className="flex items-center gap-3 border-b border-[#e1e1e1] py-2.5">
+              <li className="flex items-start gap-2 border-b border-[#e1e1e1] py-2.5 sm:items-center sm:gap-3">
                 {refIconCell(<Award className="shrink-0" />)}
-                <span className="min-w-0 flex-1">Panelarea (ca)</span>
-                <span className={`shrink-0 pl-3 text-right font-semibold text-[#305a42]`}>
+                <span className="min-w-0 flex-1 break-words pr-1 leading-snug">Panelarea (ca)</span>
+                <span className="shrink-0 pl-1 text-right text-[13px] font-semibold tabular-nums text-[#305a42] sm:pl-3 sm:text-[15px]">
                   {pageCalc.panelAreaM2} m²
                 </span>
               </li>
-              <li className="flex items-center gap-3 border-b border-[#e1e1e1] py-2.5">
+              <li className="flex items-start gap-2 border-b border-[#e1e1e1] py-2.5 sm:items-center sm:gap-3">
                 {refIconCell(<Share2 className="shrink-0" />)}
-                <span className="min-w-0 flex-1">Till nätet / år (indikativt)</span>
-                <span className={`shrink-0 pl-3 text-right font-semibold text-[#305a42]`}>
+                <span className="min-w-0 flex-1 break-words pr-1 leading-snug">Till nätet / år (indikativt)</span>
+                <span className="shrink-0 pl-1 text-right text-[13px] font-semibold tabular-nums text-[#305a42] sm:pl-3 sm:text-[15px]">
                   {fmt(Math.round(pageCalc.exportKwh))} kWh
                 </span>
               </li>
@@ -450,7 +450,7 @@ export function CalculatorPageEmbedded() {
           </>
         ) : null}
 
-        <p className="mt-auto pt-4 text-[11px] leading-relaxed text-[#394d42]/65">
+        <p className="mt-6 pt-2 text-[11px] leading-relaxed text-[#394d42]/65 lg:mt-auto lg:pt-4">
           *Indikativa siffror för vägledning — inte bindande offerter. ROT/grönt avdrag är förenklat
           (ca 30 % på arbetsdel i vår modell).
         </p>
@@ -477,7 +477,7 @@ export function CalculatorPageEmbedded() {
   return (
     <section
       id="calculator"
-      className="nx-calculator-root nx-calculator-page-ref scroll-mt-24 bg-[#e4ebe2] py-10 px-4 sm:px-6"
+      className="nx-calculator-root nx-calculator-page-ref scroll-mt-24 overflow-x-hidden bg-[#e4ebe2] py-8 px-3 sm:py-10 sm:px-6"
     >
       <CalculatorPageLayout
         brand={calculatorBrandLogo}
@@ -487,7 +487,7 @@ export function CalculatorPageEmbedded() {
           </p>
         }
         leftColumn={
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-3 lg:pb-2">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden pb-3 lg:pb-2">
             <header className="shrink-0 border-b border-[#e1e1e1] px-1 pb-3 pt-1 lg:px-0">
               <h2 className="text-[1.1rem] font-bold leading-tight tracking-tight text-[#305a42] lg:text-[1.25rem]">
                 Räkna på din solcellsbesparing
@@ -508,7 +508,7 @@ export function CalculatorPageEmbedded() {
                   </label>
                   <input
                     id="nx-page-address"
-                    className="h-9 w-full rounded-none border border-[#c6c6c6] bg-white px-3 text-[14px] text-[#1e221d] outline-none focus:border-2 focus:border-[#315a43]"
+                    className="h-11 min-h-[44px] w-full min-w-0 rounded-none border border-[#c6c6c6] bg-white px-3 text-[16px] text-[#1e221d] outline-none focus:border-2 focus:border-[#315a43] sm:h-9 sm:min-h-0 sm:text-[14px]"
                     type="text"
                     autoComplete="street-address"
                     placeholder="Exempelgatan 12, 123 45 Stad"
@@ -583,11 +583,11 @@ export function CalculatorPageEmbedded() {
                 <p className="mt-2 mb-1 text-[12px] text-[#1e221d]">
                   När använder du mest el hemma?
                 </p>
-                <div className="flex flex-col gap-1 sm:grid sm:grid-cols-3 sm:gap-1.5">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-1.5">
                   {homeOptions.map((opt) => (
                     <label
                       key={opt.id}
-                      className={`flex cursor-pointer items-center justify-between border px-2 py-1.5 transition-colors sm:flex-col sm:justify-center sm:gap-0.5 sm:px-1.5 sm:py-2 ${homeTime === opt.id ? "border-[#e1e1e1] bg-[#e4ebe2]" : "border-[#e1e1e1] bg-white hover:bg-[#f8f6f3]"}`}
+                      className={`flex min-h-[44px] cursor-pointer items-center justify-between gap-2 border px-3 py-2.5 transition-colors sm:min-h-0 sm:flex-col sm:justify-center sm:gap-0.5 sm:px-1.5 sm:py-2 ${homeTime === opt.id ? "border-[#e1e1e1] bg-[#e4ebe2]" : "border-[#e1e1e1] bg-white hover:bg-[#f8f6f3]"}`}
                     >
                       <input
                         type="radio"
@@ -596,14 +596,14 @@ export function CalculatorPageEmbedded() {
                         checked={homeTime === opt.id}
                         onChange={() => setHomeTime(opt.id)}
                       />
-                      <span className="text-[12px] text-[#1e221d] sm:text-center sm:text-[11px] sm:leading-tight">
+                      <span className="text-[14px] text-[#1e221d] sm:text-center sm:text-[11px] sm:leading-tight">
                         {opt.label}
                       </span>
                       <span
-                        className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border sm:mt-0.5 ${homeTime === opt.id ? "border-[#9fda47] bg-[#9fda47]" : "border-[#7b7b7b] bg-transparent"}`}
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border sm:mt-0.5 sm:h-3.5 sm:w-3.5 ${homeTime === opt.id ? "border-[#9fda47] bg-[#9fda47]" : "border-[#7b7b7b] bg-transparent"}`}
                         aria-hidden
                       >
-                        {homeTime === opt.id ? <span className="text-[8px] text-[#394d42]">✓</span> : null}
+                        {homeTime === opt.id ? <span className="text-[10px] text-[#394d42] sm:text-[8px]">✓</span> : null}
                       </span>
                     </label>
                   ))}
@@ -651,7 +651,7 @@ export function CalculatorPageEmbedded() {
                     onChange={(e) =>
                       setBatteryKey(e.target.value as (typeof BATTERY_OPTIONS)[number]["key"])
                     }
-                    className="h-9 w-full appearance-none rounded-none border border-[#c6c6c6] bg-white bg-[length:12px] bg-[right_12px_center] bg-no-repeat px-3 pr-9 text-[14px] text-[#1e221d] outline-none focus:border-2 focus:border-[#315a43]"
+                    className="h-11 min-h-[44px] w-full min-w-0 appearance-none rounded-none border border-[#c6c6c6] bg-white bg-[length:12px] bg-[right_12px_center] bg-no-repeat px-3 pr-9 text-[16px] text-[#1e221d] outline-none focus:border-2 focus:border-[#315a43] sm:h-9 sm:min-h-0 sm:text-[14px]"
                     style={{
                       backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%23315a43' d='M1 1l5 5 5-5'/%3E%3C/svg%3E")`,
                     }}

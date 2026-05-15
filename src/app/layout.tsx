@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { ClientProviders } from "@/components/ClientProviders";
+import { GtmHead } from "@/components/cookies/GtmClient";
 import { ConditionalHeader } from "@/components/ConditionalHeader";
 import { articles } from "@/lib/articles";
 import {
@@ -206,11 +207,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="sv" className={`scroll-smooth ${montserrat.variable}`}>
+      <head>
+        <GtmHead gtmId={gtmId} />
+      </head>
       <body
         className="antialiased text-forest min-h-screen font-sans"
         style={{ backgroundColor: "#f9fafb", color: "#065a45" }}
       >
-        <ClientProviders gtmId={gtmId}>
+        {gtmId ? (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        ) : null}
+        <ClientProviders>
           {children}
           <ConditionalHeader />
         </ClientProviders>
